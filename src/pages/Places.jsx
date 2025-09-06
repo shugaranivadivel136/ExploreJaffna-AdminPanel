@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Places = () => {
-  const [places, setPlaces] = useState([
-    { id: 1, name: "Jaffna Fort", location: "Jaffna", category: "Historical" },
-    { id: 2, name: "Nallur Kandaswamy Temple", location: "Jaffna", category: "Religious" },
-  ]);
-
-  const [formData, setFormData] = useState({ name: "", location: "", category: "" });
+  const [places, setPlaces] = useState([]);
+  const [formData, setFormData] = useState({ name: "", location: "", p_description: "", image_url: "", category: "" });
   const [editingId, setEditingId] = useState(null);
+
+  // Load from localStorage on first render
+  useEffect(() => {
+    const storedPlaces = localStorage.getItem("places");
+    if (storedPlaces) {
+      setPlaces(JSON.parse(storedPlaces));
+    } else {
+      setPlaces([]);
+    }
+  }, []);
+
+  // Save to localStorage whenever places change
+  useEffect(() => {
+    localStorage.setItem("places", JSON.stringify(places));
+  }, [places]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,8 +29,8 @@ const Places = () => {
 
     if (editingId) {
       // Update existing place
-      setPlaces(
-        places.map((p) => (p.id === editingId ? { ...p, ...formData } : p))
+      setPlaces((prev) =>
+        prev.map((p) => (p.id === editingId ? { ...p, ...formData } : p))
       );
       setEditingId(null);
     } else {
@@ -28,30 +39,36 @@ const Places = () => {
         id: Date.now(),
         ...formData,
       };
-      setPlaces([...places, newPlace]);
+      setPlaces((prev) => [...prev, newPlace]);
     }
 
-    setFormData({ name: "", location: "", category: "" });
+    setFormData({ name: "", location: "", p_description: "", image_url: "", image_url: "", category: "" });
   };
 
   const handleEdit = (place) => {
     setEditingId(place.id);
-    setFormData({ name: place.name, location: place.location, category: place.category });
+    setFormData({
+      name: place.name,
+      location: place.location,
+      p_description: place.p_description,
+      image_url: place.image_url,
+      category: place.category,
+    });
   };
 
   const handleDelete = (id) => {
-    setPlaces(places.filter((p) => p.id !== id));
+    setPlaces((prev) => prev.filter((p) => p.id !== id));
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
-        <h1 className="text-2xl font-semibold mb-4">Manage Places</h1>
+    <div className="p-8 bg-gray-100 max-h-screen">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8">
+        <h1 className="text-4xl font-semibold mb-8">Manage Places</h1>
 
         {/* Add / Edit Place Form */}
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+          className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-20"
         >
           <input
             type="text"
@@ -73,6 +90,24 @@ const Places = () => {
           />
           <input
             type="text"
+            name="p_description"
+            placeholder="Description"
+            value={formData.p_description}
+            onChange={handleChange}
+            className="border rounded-md px-3 py-2"
+            required
+          />
+          <input
+            type="text"
+            name="image_url"
+            placeholder="Image URL"
+            value={formData.image_url}
+            onChange={handleChange}
+            className="border rounded-md px-3 py-2"
+            required
+          />
+          <input
+            type="text"
             name="category"
             placeholder="Category"
             value={formData.category}
@@ -82,7 +117,7 @@ const Places = () => {
           />
           <button
             type="submit"
-            className="col-span-1 md:col-span-3 bg-blue-600 text-white rounded-md py-2 hover:bg-blue-700"
+            className="col-span-1 md:col-span-6 bg-blue-600 text-center text-white rounded-md py-2 hover:bg-blue-700"
           >
             {editingId ? "Update Place" : "Add Place"}
           </button>
@@ -92,28 +127,32 @@ const Places = () => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr>
-              <th className="border-b p-2">Name</th>
-              <th className="border-b p-2">Location</th>
-              <th className="border-b p-2">Category</th>
-              <th className="border-b p-2 text-center">Actions</th>
+              <th className="border-b p-4">Name</th>
+              <th className="border-b p-4">Location</th>
+              <th className="border-b p-4">Description</th>
+              <th className="border-b p-4">Image URL</th>
+              <th className="border-b p-4">Category</th>
+              <th className="border-b p-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {places.map((places) => (
-              <tr key={places.id}>
-                <td className="border-b p-2">{places.name}</td>
-                <td className="border-b p-2">{places.location}</td>
-                <td className="border-b p-2">{places.category}</td>
-                <td className="border-b p-2 text-center space-x-2">
+            {places.map((place) => (
+              <tr key={place.id}>
+                <td className="border-b p-4">{place.name}</td>
+                <td className="border-b p-4">{place.location}</td>
+                <td className="border-b p-4">{place.p_description}</td>
+                <td className="border-b p-4">{place.image_url}</td>
+                <td className="border-b p-4">{place.category}</td>
+                <td className="border-b p-4 text-center space-x-4">
                   <button
-                    onClick={() => handleEdit(places)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
+                    onClick={() => handleEdit(place)}
+                    className="bg-yellow-500 text-white px-8 py-1 rounded-md hover:bg-yellow-600"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(places.id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
+                    onClick={() => handleDelete(place.id)}
+                    className="bg-red-600 text-white px-8 py-1 rounded-md hover:bg-red-700"
                   >
                     Delete
                   </button>
@@ -122,10 +161,7 @@ const Places = () => {
             ))}
             {places.length === 0 && (
               <tr>
-                <td
-                  colSpan="4"
-                  className="text-center text-gray-500 py-4"
-                >
+                <td colSpan="6" className="text-center text-gray-500 py-6">
                   No places found.
                 </td>
               </tr>
