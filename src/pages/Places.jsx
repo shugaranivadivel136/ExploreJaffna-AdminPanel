@@ -141,18 +141,24 @@ const Places = () => {
                 <td className="border-b p-4">{place.name}</td>
                 <td className="border-b p-4">{place.location}</td>
                 <td className="border-b p-4">{place.p_description}</td>
-                <td className="border-b p-4">{place.image_url}</td>
+                <td className="border-b p-4">
+                  <img
+                    src={place.image_url}
+                    alt={place.name}
+                    className="h-12 w-20 object-cover rounded"
+                  />
+                </td>
                 <td className="border-b p-4">{place.category}</td>
                 <td className="border-b p-4 text-center space-x-4">
                   <button
                     onClick={() => handleEdit(place)}
-                    className="bg-yellow-500 text-white px-8 py-1 rounded-md hover:bg-yellow-600"
+                    className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(place.id)}
-                    className="bg-red-600 text-white px-8 py-1 rounded-md hover:bg-red-700"
+                    className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
                   >
                     Delete
                   </button>

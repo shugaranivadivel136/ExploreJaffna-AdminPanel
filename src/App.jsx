@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./components/DashboardLayout";
 //import NotFound from "./pages/NotFound";
 import Places from "./pages/Places";
+import Events from "./pages/Events";
+
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,7 @@ const App = () => (
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="places" element={<Places />} />
+            <Route path="events" element={<Events />} />
             <Route path="analytics" element={<div className="p-6">Analytics Page</div>} />
             <Route path="bookings" element={<div className="p-6">Bookings Page</div>} />
             <Route path="destinations" element={<div className="p-6">Destinations Page</div>} />
