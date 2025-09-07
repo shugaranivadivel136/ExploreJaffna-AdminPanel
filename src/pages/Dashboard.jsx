@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import EventsBox from "../components/EventBox";
+
 import {
   Users,
   MapPin,
@@ -48,7 +50,7 @@ const Dashboard = () => {
         <Card className="border-l-4 border-l-tourism-ocean shadow-soft">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Events</CardTitle>
-            <Calendar className="h-4 w-4 text-tourism-ocean" />
+            {/* <Calendar className="h-4 w-4 text-tourism-ocean" /> */}
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold"></div>
@@ -56,6 +58,10 @@ const Dashboard = () => {
               <TrendingUp className="h-3 w-3 mr-1" />
 
             </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <EventsBox limit={1} />
+              {/* Add other boxes here, like Places, Restaurants, Users, etc. */}
+          </div>
           </CardContent>
         </Card>
 

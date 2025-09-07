@@ -40,6 +40,30 @@ export default function DashboardLayout() {
           >
             Restaurants
           </Link>
+          <Link
+            to="/dashboard/users"
+            className="text-gray-700 hover:bg-gray-100 rounded px-3 py-2"
+          >
+            Users
+          </Link>
+          <Link
+            to="/dadhboard/native-products"
+            className="text-gray-700 hover:bg-gray-100 rounded px-3 py-2"
+          >
+            Native Products
+          </Link>
+          <Link
+            to="/dashboard/user-reviews"
+            className="text-gray-700 hover:bg-gray-100 rounded px-3 py-2"
+          >
+            User Reviews
+          </Link>
+          <Link
+           to="/dashboard/settings"
+           className="text-gray-700 hover:bg-gray-100 rounded px-3 py-2" 
+          >
+            Settings
+          </Link>
         </nav>
       </aside>
 
