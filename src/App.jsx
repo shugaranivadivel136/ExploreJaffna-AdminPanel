@@ -9,7 +9,7 @@ import DashboardLayout from "./components/DashboardLayout";
 //import NotFound from "./pages/NotFound";
 import Places from "./pages/Places";
 import Events from "./pages/Events";
-
+//import Users from "./pages/Users";
 
 const queryClient = new QueryClient();
 
@@ -26,13 +26,15 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="places" element={<Places />} />
             <Route path="events" element={<Events />} />
+            {/*<Route path="users" element={<Users />} />*/}
             <Route path="analytics" element={<div className="p-6">Analytics Page</div>} />
-            <Route path="bookings" element={<div className="p-6">Bookings Page</div>} />
+            {/*<Route path="bookings" element={<div className="p-6">Bookings Page</div>} />
             <Route path="destinations" element={<div className="p-6">Destinations Page</div>} />
             <Route path="users" element={<div className="p-6">Users Page</div>} />
             <Route path="revenue" element={<div className="p-6">Revenue Page</div>} />
-            <Route path="settings" element={<div className="p-6">Settings Page</div>} />
+            <Route path="settings" element={<div className="p-6">Settings Page</div>} /> */}
           </Route>
+          <Route path="upload" />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>

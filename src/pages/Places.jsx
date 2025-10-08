@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
+import toast, { Toaster } from "react-hot-toast";
 
 const Places = () => {
   const [places, setPlaces] = useState([]);
+  const [filteredPlaces, setFilteredPlaces] = useState([]);
   const [formData, setFormData] = useState({
     p_name: "",
     latitude: "",
@@ -13,6 +15,13 @@ const Places = () => {
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isTableVisible, setIsTableVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    category: "",
+    name: ""
+  });
+  const [categories, setCategories] = useState([]);
 
   // Fetch all places from Supabase
   const fetchPlaces = async () => {
@@ -20,11 +29,20 @@ const Places = () => {
     const { data, error } = await supabase
       .from("places")
       .select("*");
+    
     if (error) {
       console.error("Error fetching places:", error.message);
-    } else {
-      setPlaces(data);
-    }
+      toast.error("Failed to fetch places: " + error.message);
+      setLoading(false);
+      return;
+    } 
+    setPlaces(data || []);
+    setFilteredPlaces(data || []);
+    
+    // Extract unique categories
+    const uniqueCategories = [...new Set(data.map(place => place.category_name))];
+    setCategories(uniqueCategories);
+    
     setLoading(false);
   };
 
@@ -32,23 +50,87 @@ const Places = () => {
     fetchPlaces();
   }, []);
 
+  // Apply filters whenever filters or places change
+  useEffect(() => {
+    let result = places;
+    
+    if (filters.category) {
+      result = result.filter(place => 
+        place.category_name.toLowerCase().includes(filters.category.toLowerCase())
+      );
+    }
+    
+    if (filters.name) {
+      result = result.filter(place => 
+        place.p_name.toLowerCase().includes(filters.name.toLowerCase())
+      );
+    }
+    
+    setFilteredPlaces(result);
+  }, [filters, places]);
+
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters({ ...filters, [name]: value });
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      category: "",
+      name: ""
+    });
+  };
+
+  // Validate form inputs
+  const validateForm = () => {
+    if (!formData.p_name || !formData.latitude || !formData.longitude || !formData.p_description || !formData.image_url || !formData.category_name) {
+      toast.error("Please fill in all fields.");
+      return false;
+    }
+    const lat = parseFloat(formData.latitude);
+    const lon = parseFloat(formData.longitude);
+    if (isNaN(lat) || isNaN(lon)) {
+      toast.error("Latitude and Longitude must be valid numbers.");
+      return false;
+    }
+    /*if (isNaN(lon) || lon < -180 || lon > 180) {
+      toast.error("Longitude must be between -180 and 180.");
+      return false;
+    }*/
+    
+    // Validate URL format
+    try {
+      new URL(formData.image_url);
+    } catch (_) {
+      toast.error("Please enter a valid image URL.");
+      return false;
+    }
+    
+    return true;
+  };
+
   // Add or update place
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
-    if (!formData.p_name || !formData.latitude || !formData.longitude || !formData.p_description || !formData.image_url || !formData.category_name) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
+    setLoading(true);
     if (editingId !== null) {
-      // update existing place
+      // Update existing place
       const { data, error } = await supabase
         .from("places")
         .update({
           p_name: formData.p_name,
-          latitude: formData.latitude,
-          longitude: formData.longitude,
+          latitude: parseFloat(formData.latitude),
+          longitude: parseFloat(formData.longitude),
           p_description: formData.p_description,
           image_url: formData.image_url,
           category_name: formData.category_name
@@ -56,222 +138,480 @@ const Places = () => {
         .eq("place_id", editingId)
         .select();
 
-      // Optimistically update UI
-      /*const fromData = { ...formData, place_id: editingId };
-        setPlaces((prev) =>
+      if (error) {
+        console.error("Error updating place:", error.message);
+        toast.error("Failed to update place: " + error.message);
+        setLoading(false);
+        return;
+      }
+
+      // Update UI with the new data
+      setPlaces((prev) =>
         prev.map((place) =>
-            place.place_id === editingId ? { ...place, ...fromData } : place
+          place.place_id === editingId ? { ...place, ...data[0] } : place
         )
       );
-      setEditingId(true); */ //reset editing state
-
-        if (error) {
-          console.error("Error updating place:", error.message);
-          alert("Failed to update place: "+error.message);
-        }
-        //Replace in table without reloading everything
-        setPlaces((prev) =>
-          prev.map((place) =>
-            place.place_id === editingId ? { ...place, ...data[0] } : place)
-        );
-
-        setEditingId(null);
-        await fetchPlaces();
+      toast.success("Place updated successfully!");
+      resetForm();
     } else {
-      // insert new place
+      // Insert new place
       const { data, error } = await supabase
-      .from("places")
-      .insert([
-        {
-          p_name: formData.p_name,
-          latitude: formData.latitude,
-          longitude: formData.longitude,
-          p_description: formData.p_description,
-          image_url: formData.image_url,
-          category_name: formData.category_name,
-          
-        }
-      ]).select();
+        .from("places")
+        .insert([
+          {
+            p_name: formData.p_name,
+            latitude: parseFloat(formData.latitude),
+            longitude: parseFloat(formData.longitude),
+            p_description: formData.p_description,
+            image_url: formData.image_url,
+            category_name: formData.category_name,
+          }
+        ])
+        .select();
 
       if (error) {
         console.error("Error adding place:", error.message);
-        alert("Failed to add place: "+error.message);
-      } else {
-        setPlaces((prev) => [...prev, ...data]);
-
-        // clear form
-        setFormData({
-          p_name: "",
-          latitude: "",
-          longitude: "",
-          p_description: "",
-          image_url: "",
-          category_name: ""
-        });
+        toast.error("Failed to add place: " + error.message);
+        setLoading(false);
+        return;
       }
+
+      // Add new place to UI
+      setPlaces((prev) => [...data, ...prev]);
+      
+      // Add new category if it doesn't exist
+      if (!categories.includes(formData.category_name)) {
+        setCategories([...categories, formData.category_name]);
+      }
+      
+      toast.success("Place added successfully!");
+      resetForm();
     }
-    setEditingId(place_id);
+    setLoading(false);
+    setIsFormVisible(false);
+  };
+
+  // Reset form and editing state
+  const resetForm = () => {
+    setFormData({
+      p_name: "",
+      latitude: "",
+      longitude: "",
+      p_description: "",
+      image_url: "",
+      category_name: ""
+    });
+    setEditingId(null);
   };
 
   // Edit button handler
   const handleEdit = (place) => {
-    const p = places.find((x) => x.place_id === place.place_id);
-    if (!p) return;
     setFormData({
       p_name: place.p_name,
-      latitude: place.latitude,
-      longitude: place.longitude,
+      latitude: place.latitude.toString(),
+      longitude: place.longitude.toString(),
       p_description: place.p_description,
       image_url: place.image_url,
       category_name: place.category_name
     });
     setEditingId(place.place_id);
+    setIsFormVisible(true);
+    // Scroll to form
+    document.getElementById('place-form').scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Delete place
-  const handleDelete = async (id) => {
-    const { error } = await supabase.from("places").delete().eq("id", id);
-    if (error) {
-      console.error("Error deleting place:", error.message);
-      alert("Failed to delete place.");
-    } else {
-      await fetchPlaces();
+  // Delete place with confirmation
+  const handleDelete = async (place_id) => {
+    const placeName = places.find(p => p.place_id === place_id)?.p_name;
+    
+    // Custom confirmation dialog
+    if (window.confirm(`Are you sure you want to delete "${placeName}"? This action cannot be undone.`)) {
+      setLoading(true);
+      const { error } = await supabase
+        .from("places")
+        .delete()
+        .eq("place_id", place_id);
+
+      if (error) {
+        console.error("Error deleting place:", error.message);
+        toast.error("Failed to delete place: " + error.message);
+        setLoading(false);
+        return;
+      }
+
+      // Remove from UI without refetching
+      setPlaces(prev => prev.filter(place => place.place_id !== place_id));
+      toast.success(`"${placeName}" deleted successfully!`);
+      setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Toggle form visibility
+  const toggleFormVisibility = () => {
+    setIsFormVisible(!isFormVisible);
+    if (editingId && !isFormVisible) {
+      resetForm();
+    }
+  };
+
+  // Toggle table visibility
+  const toggleTableVisibility = () => {
+    setIsTableVisible(!isTableVisible);
   };
 
   return (
-    <div className="p-8 bg-gray-100 max-h-screen">
-      <div className="max-w-full mx-auto bg-white rounded-xl shadow-md p-8">
-        <h1 className="text-4xl font-semibold mb-8">Manage Places</h1>
-
-        {/* Add / Edit Place Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-20"
-        >
-          <input
-            type="text"
-            name="p_name"
-            placeholder="Name"
-            value={formData.p_name}
-            onChange={handleChange}
-            className="w-full p-2 mb-2 border rounded-md px-3 py-2"
-            required
-          />
-          <input
-            type="double precision"
-            name="latitude"
-            placeholder="Latitude"
-            value={formData.latitude}
-            onChange={handleChange}
-            className="w-full p-2 mb-2 border rounded-md px-3 py-2"
-            required
-          />
-          <input
-            type="double precision"
-            name="longitude"
-            placeholder="Longitude"
-            value={formData.longitude}
-            onChange={handleChange}
-            className="w-full p-2 mb-2 border rounded-md px-3 py-2"
-            required
-          />
-          <input
-            type="text"
-            name="p_description"
-            placeholder="Description"
-            value={formData.p_description}
-            onChange={handleChange}
-            className="w-full p-2 mb-2 border rounded-md px-3 py-2"
-            required
-          />
-          <input
-            type="text"
-            name="image_url"
-            placeholder="Image"
-            value={formData.image_url}
-            onChange={handleChange}
-            className="w-full p-2 mb-2 border rounded-md px-3 py-2"
-            required
-          />
-          <input
-            type="text"
-            name="category_name"
-            placeholder="Category"
-            value={formData.category_name}
-            onChange={handleChange}
-            className="w-full p-2 mb-2 border rounded-md px-3 py-2"
-            required
-          />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-center text-white rounded-md py-2 hover:bg-blue-700"
-          >
-            {editingId ? "Update Place" : "Add Place"}
-          </button>
-        </form>
-
-        {/* Places Table */}
-        {/*loading ? (
-          <p>Loading places...</p>
-        ) : (*/}
-          <table className="w-full text-left border-collapse border-gray-300">
-            <thead>
-              <tr>
-                <th className="border p-4">Name</th>
-                <th className="border p-4">Latitude</th>
-                <th className="border p-4">Longitude</th>
-                <th className="border p-4">Description</th>
-                <th className="border p-4">Image</th>
-                <th className="border p-4">Category</th>
-                <th className="border p-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {places.map((place) => (
-                <tr key={place.place_id}>
-                  <td className="border p-4">{place.p_name}</td>
-                  <td className="border p-4">{place.latitude}</td>
-                  <td className="border p-4">{place.longitude}</td>
-                  <td className="border p-4">{place.p_description}</td>
-                  <td className="border p-4">
-                    <img
-                      src={place.image_url}
-                      alt={place.p_name}
-                      className="h-12 w-20 object-cover rounded"
-                    />
-                  </td>
-                  <td className="border-b p-4">{place.category_name}</td>
-                  <td className="border-b p-4 text-center space-x-4">
-                    <button
-                      onClick={() => handleEdit(place)}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(place.id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {places.length === 0 && (
-                <tr>
-                  <td colSpan="7" className="text-center text-gray-500 py-6">
-                    No places found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-6">
+      <Toaster position="top-right" />
+      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 md:p-8">
+          <h1 className="text-3xl font-bold mb-2">Places Management</h1>
+          <p className="text-blue-100">Add, edit, and manage your favorite places</p>
+        </div>
         
+        <div className="p-6 md:p-8">
+          {/* Toggle Form Button */}
+          <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-xl font-semibold text-gray-800">Places Directory</h2>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={toggleFormVisibility}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+              >
+                <span className="mr-2">{isFormVisible ? '▲' : '▼'}</span>
+                {isFormVisible ? 'Hide Form' : 'Add New Place'}
+              </button>
+              <button
+                onClick={toggleTableVisibility}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+              >
+                <span className="mr-2">{isTableVisible ? '▲' : '▼'}</span>
+                {isTableVisible ? 'Hide Places' : 'View All Places'}
+              </button>
+            </div>
+          </div>
+
+          {/* Add / Edit Place Form */}
+          {isFormVisible && (
+            <form 
+              id="place-form"
+              onSubmit={handleSubmit} 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 bg-blue-50 p-6 rounded-xl border border-blue-100"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 col-span-full mb-2">
+                {editingId ? `Editing Place: ${formData.p_name}` : 'Add New Place'}
+              </h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <input
+                  type="text"
+                  name="p_name"
+                  placeholder="Enter place name"
+                  value={formData.p_name}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Latitude *</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="latitude"
+                  placeholder="e.g., 40.7128"
+                  value={formData.latitude}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Longitude *</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="longitude"
+                  placeholder="e.g., -74.0060"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <textarea
+                  name="p_description"
+                  placeholder="Enter description"
+                  value={formData.p_description}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL *</label>
+                <input
+                  type="url"
+                  name="image_url"
+                  placeholder="https://example.com/image.jpg"
+                  value={formData.image_url}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                <input
+                  type="text"
+                  name="category_name"
+                  placeholder="e.g., Restaurant, Park"
+                  value={formData.category_name}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                  disabled={loading}
+                  list="categories-list"
+                />
+                <datalist id="categories-list">
+                  {categories.map((category, index) => (
+                    <option key={index} value={category} />
+                  ))}
+                </datalist>
+              </div>
+              
+              {/* Image Preview */}
+              {formData.image_url && (
+                <div className="col-span-full">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image Preview</label>
+                  <div className="h-40 w-full border border-gray-300 rounded-lg overflow-hidden">
+                    <img
+                      src={formData.image_url}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                      onError={(e) => (e.target.src = "https://via.placeholder.com/300x150?text=Invalid+Image+URL")}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div className="col-span-full flex flex-wrap gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors flex items-center"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : editingId !== null ? (
+                    'Update Place'
+                  ) : (
+                    'Add Place'
+                  )}
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetForm();
+                    if (editingId) setIsFormVisible(false);
+                  }}
+                  className="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 transition-colors"
+                  disabled={loading}
+                >
+                  {editingId !== null ? 'Cancel Edit' : 'Clear Form'}
+                </button>
+              </div>
+              
+              <div className="col-span-full text-xs text-gray-500 mt-2">
+                <p>* Required fields. Latitude must be between -90 and 90. Longitude must be between -180 and 180.</p>
+              </div>
+            </form>
+          )}
+
+          {/* Filter Section - Only shown when table is visible */}
+          {isTableVisible && (
+            <div className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 p-5 rounded-xl border border-purple-100 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter Places
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select
+                    name="category"
+                    value={filters.category}
+                    onChange={handleFilterChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((category, index) => (
+                      <option key={index} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Place Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Search by name"
+                    value={filters.name}
+                    onChange={handleFilterChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  />
+                </div>
+                
+                <div className="flex items-end">
+                  <button
+                    onClick={clearFilters}
+                    className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-4 text-sm text-purple-700 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Showing {filteredPlaces.length} of {places.length} places
+              </div>
+            </div>
+          )}
+
+          {/* Places List - Only shown when table is visible */}
+          {isTableVisible && (loading && !places.length ? (
+            <div className="flex justify-center items-center h-64 bg-gray-50 rounded-xl">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+              {filteredPlaces.length === 0 ? (
+                <div className="text-center py-16 bg-gray-50 rounded-lg">
+                  <div className="text-gray-400 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-700 mb-1">
+                    {places.length === 0 ? 'No places yet' : 'No matching places found'}
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    {places.length === 0 ? 'Get started by adding your first place!' : 'Try adjusting your filters'}
+                  </p>
+                  {places.length === 0 && (
+                    <button
+                      onClick={() => setIsFormVisible(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    >
+                      Add Your First Place
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="p-4 text-left text-sm font-semibold text-gray-700">Place</th>
+                        <th className="p-4 text-left text-sm font-semibold text-gray-700 hidden lg:table-cell">Coordinates</th>
+                        <th className="p-4 text-left text-sm font-semibold text-gray-700 hidden md:table-cell">Description</th>
+                        <th className="p-4 text-left text-sm font-semibold text-gray-700">Category</th>
+                        <th className="p-4 text-center text-sm font-semibold text-gray-700">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredPlaces.map((place) => (
+                        <tr key={place.place_id} className="hover:bg-gray-50 transition-colors">
+                          <td className="p-4">
+                            <div className="flex items-center">
+                              <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-md">
+                                <img
+                                  src={place.image_url}
+                                  alt={place.p_name}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => (e.target.src = "https://via.placeholder.com/64x48?text=Image+Error")}
+                                />
+                              </div>
+                              <div className="ml-4">
+                                <div className="font-medium text-gray-900">{place.p_name}</div>
+                                <div className="text-sm text-gray-500 lg:hidden">
+                                  {place.latitude}, {place.longitude}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 text-sm text-gray-700 hidden lg:table-cell">
+                            {place.latitude}, {place.longitude}
+                          </td>
+                          <td className="p-4 text-sm text-gray-700 hidden md:table-cell">
+                            <div className="line-clamp-2">{place.p_description}</div>
+                          </td>
+                          <td className="p-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {place.category_name}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex justify-center space-x-2">
+                              <button
+                                onClick={() => handleEdit(place)}
+                                className="text-blue-600 hover:text-blue-800 transition-colors p-1 rounded-md hover:bg-blue-50"
+                                title="Edit"
+                                disabled={loading}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDelete(place.place_id)}
+                                className="text-red-600 hover:text-red-800 transition-colors p-1 rounded-md hover:bg-red-50"
+                                title="Delete"
+                                disabled={loading}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
