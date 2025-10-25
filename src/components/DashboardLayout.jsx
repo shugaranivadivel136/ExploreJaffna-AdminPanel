@@ -47,7 +47,7 @@ export default function DashboardLayout() {
             Users
           </Link>
           <Link
-            to="/dadhboard/native-products"
+            to="/dashboard/native_products"
             className="text-gray-700 hover:bg-gray-100 rounded px-3 py-2"
           >
             Native Products

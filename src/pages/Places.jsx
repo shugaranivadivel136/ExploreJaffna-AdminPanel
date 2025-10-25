@@ -18,10 +18,12 @@ const Places = () => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isTableVisible, setIsTableVisible] = useState(false);
   const [filters, setFilters] = useState({
-    category: "",
-    name: ""
+    category_name: "",
+    p_name: ""
   });
   const [categories, setCategories] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
 
   // Fetch all places from Supabase
   const fetchPlaces = async () => {
@@ -54,15 +56,15 @@ const Places = () => {
   useEffect(() => {
     let result = places;
     
-    if (filters.category) {
+    if (filters.category_name) {
       result = result.filter(place => 
-        place.category_name.toLowerCase().includes(filters.category.toLowerCase())
+        place.category_name.toLowerCase().includes(filters.category_name.toLowerCase())
       );
     }
     
-    if (filters.name) {
+    if (filters.p_name) {
       result = result.filter(place => 
-        place.p_name.toLowerCase().includes(filters.name.toLowerCase())
+        place.p_name.toLowerCase().includes(filters.p_name.toLowerCase())
       );
     }
     
@@ -71,49 +73,113 @@ const Places = () => {
 
   // Handle form input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { p_name, value } = e.target;
+    setFormData({ ...formData, [p_name]: value });
+  };
+
+  // Handle image file selection
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please select a valid image file");
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
+      
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Clear the URL input when file is selected
+      setFormData(prev => ({ ...prev, image_url: "" }));
+    }
+  };
+
+  // Upload image to Supabase Storage
+  const uploadImageToSupabase = async (file) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `restaurant-images/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('jaffnaexplore')
+        .getPublicUrl(fileName);
+
+      if (error) {
+        throw error;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('restaurants')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
   };
 
   // Handle filter changes
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters({ ...filters, [name]: value });
+    const { p_name, value } = e.target;
+    setFilters({ ...filters, [p_name]: value });
   };
 
   // Clear all filters
   const clearFilters = () => {
     setFilters({
-      category: "",
-      name: ""
+      category_name: "",
+      p_name: ""
     });
   };
 
   // Validate form inputs
   const validateForm = () => {
-    if (!formData.p_name || !formData.latitude || !formData.longitude || !formData.p_description || !formData.image_url || !formData.category_name) {
+    if (!formData.p_name || !formData.latitude || !formData.longitude || 
+        !formData.p_description || !formData.category_name) {
       toast.error("Please fill in all fields.");
       return false;
     }
+
+    // Check if either image file or image URL is provided
+    if (!imageFile && !formData.image_url) {
+      toast.error("Please either upload an image or provide an image URL.");
+      return false;
+    }
+
     const lat = parseFloat(formData.latitude);
     const lon = parseFloat(formData.longitude);
+    
     if (isNaN(lat) || isNaN(lon)) {
       toast.error("Latitude and Longitude must be valid numbers.");
       return false;
     }
-    /*if (isNaN(lon) || lon < -180 || lon > 180) {
-      toast.error("Longitude must be between -180 and 180.");
-      return false;
-    }*/
     
-    // Validate URL format
-    try {
-      new URL(formData.image_url);
-    } catch (_) {
-      toast.error("Please enter a valid image URL.");
-      return false;
+    // Validate URL format for image if provided (not when file is uploaded)
+    if (formData.image_url && !imageFile) {
+      try {
+        new URL(formData.image_url);
+      } catch (_) {
+        toast.error("Please enter a valid image URL.");
+        return false;
+      }
     }
-    
+
     return true;
   };
 
@@ -123,72 +189,81 @@ const Places = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    if (editingId !== null) {
-      // Update existing place
-      const { data, error } = await supabase
-        .from("places")
-        .update({
-          p_name: formData.p_name,
-          latitude: parseFloat(formData.latitude),
-          longitude: parseFloat(formData.longitude),
-          p_description: formData.p_description,
-          image_url: formData.image_url,
-          category_name: formData.category_name
-        })
-        .eq("place_id", editingId)
-        .select();
+    try{
+      let imageUrl = formData.image_url;
 
-      if (error) {
-        console.error("Error updating place:", error.message);
-        toast.error("Failed to update place: " + error.message);
-        setLoading(false);
-        return;
+      //upload image if file is selected
+      if (imageFile) {
+        toast.loading("Uploading image...", { id: 'image_upload' });
+        imageUrl = await uploadImageToSupabase(imageFile);
+        toast.success("Image uploaded successfully!", { id: 'image_upload' });
       }
 
-      // Update UI with the new data
-      setPlaces((prev) =>
-        prev.map((place) =>
-          place.place_id === editingId ? { ...place, ...data[0] } : place
-        )
-      );
-      toast.success("Place updated successfully!");
-      resetForm();
-    } else {
-      // Insert new place
-      const { data, error } = await supabase
-        .from("places")
-        .insert([
-          {
-            p_name: formData.p_name,
-            latitude: parseFloat(formData.latitude),
-            longitude: parseFloat(formData.longitude),
-            p_description: formData.p_description,
-            image_url: formData.image_url,
-            category_name: formData.category_name,
-          }
-        ])
-        .select();
+      const placeData = {
+        p_name: formData.p_name,
+        latitude: parseFloat(formData.latitude),
+        longitude: parseFloat(formData.longitude),
+        p_description: formData.p_description,
+        image_url: imageUrl,
+        category_name: formData.category_name
+      };
 
-      if (error) {
-        console.error("Error adding place:", error.message);
-        toast.error("Failed to add place: " + error.message);
-        setLoading(false);
-        return;
-      }
+      if (editingId !== null) {
+        // Update existing place
+        const { data, error } = await supabase
+          .from("places")
+          .update(placeData)
+          .eq("place_id", editingId)
+          .select();
 
-      // Add new place to UI
-      setPlaces((prev) => [...data, ...prev]);
+        if (error) {
+          console.error("Error updating place:", error.message);
+          toast.error("Failed to update place: " + error.message);
+          setLoading(false);
+          return;
+        }
+
+        // Update UI with the new data
+        setPlaces((prev) =>
+          prev.map((place) =>
+            place.place_id === editingId ? { ...place, ...data[0] } : place
+          )
+        );
+        toast.success("Place updated successfully!");
+        resetForm();
+      } else {
+        // Insert new place
+        const { data, error } = await supabase
+          .from("places")
+          .insert([placeData])
+          .select();
+
+        if (error) {
+          console.error("Error adding place:", error.message);
+          toast.error("Failed to add place: " + error.message);
+          setLoading(false);
+          return;
+        }
+
+        // Add new place to UI
+        setPlaces((prev) => [...data, ...prev]);
       
-      // Add new category if it doesn't exist
-      if (!categories.includes(formData.category_name)) {
-        setCategories([...categories, formData.category_name]);
-      }
+          // Add new category if it doesn't exist
+        if (!categories.includes(formData.category_name)) {
+          setCategories([...categories, formData.category_name]);
+        }
       
-      toast.success("Place added successfully!");
-      resetForm();
+        toast.success("Place added successfully!");
+        resetForm();
+      }
+      setLoading(false);
+      setIsFormVisible(false);
+    } catch (error) {
+      console.error("Error saving place:", error.message);
+      toast.error(`Failed to save place: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setIsFormVisible(false);
   };
 
   // Reset form and editing state
@@ -201,6 +276,8 @@ const Places = () => {
       image_url: "",
       category_name: ""
     });
+    setImageFile(null);
+    setImagePreview("");
     setEditingId(null);
   };
 
@@ -214,6 +291,8 @@ const Places = () => {
       image_url: place.image_url,
       category_name: place.category_name
     });
+    setImageFile(null);
+    setImagePreview("");
     setEditingId(place.place_id);
     setIsFormVisible(true);
     // Scroll to form
@@ -359,7 +438,21 @@ const Places = () => {
                   disabled={loading}
                 />
               </div>
+
+              {/* Image Upload Field */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image *</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500 mt-1">OR use Image URL below (Max 5MB)</p>
+              </div>
               
+              {/* Image URL field */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Image URL *</label>
                 <input
@@ -372,6 +465,7 @@ const Places = () => {
                   required
                   disabled={loading}
                 />
+                <p className="text-xs text-gray-500 mt-1">Leave empty if uploading image</p>
               </div>
               
               <div>
@@ -388,24 +482,29 @@ const Places = () => {
                   list="categories-list"
                 />
                 <datalist id="categories-list">
-                  {categories.map((category, index) => (
-                    <option key={index} value={category} />
+                  {categories.map((category_name, index) => (
+                    <option key={index} value={category_name} />
                   ))}
                 </datalist>
               </div>
               
               {/* Image Preview */}
-              {formData.image_url && (
+              {(imagePreview || formData.image_url) && (
                 <div className="col-span-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Image Preview</label>
                   <div className="h-40 w-full border border-gray-300 rounded-lg overflow-hidden">
                     <img
-                      src={formData.image_url}
+                      src={imagePreview || formData.image_url}
                       alt="Preview"
                       className="h-full w-full object-cover"
                       onError={(e) => (e.target.src = "https://via.placeholder.com/300x150?text=Invalid+Image+URL")}
                     />
                   </div>
+                  {imageFile && (
+                    <p className="text-xs text-green-600 mt-1">
+                      ✓ Image ready for upload: {imageFile.p_name}
+                    </p>
+                  )}
                 </div>
               )}
               
@@ -441,7 +540,7 @@ const Places = () => {
               </div>
               
               <div className="col-span-full text-xs text-gray-500 mt-2">
-                <p>* Required fields. Latitude must be between -90 and 90. Longitude must be between -180 and 180.</p>
+                <p>* Required fields. You can either upload an image or provide an image URL.</p>
               </div>
             </form>
           )}
@@ -460,13 +559,13 @@ const Places = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <select
                     name="category"
-                    value={filters.category}
+                    value={filters.category_name}
                     onChange={handleFilterChange}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                   >
                     <option value="">All Categories</option>
-                    {categories.map((category, index) => (
-                      <option key={index} value={category}>{category}</option>
+                    {categories.map((category_name, index) => (
+                      <option key={index} value={category_name}>{category_name}</option>
                     ))}
                   </select>
                 </div>
@@ -477,7 +576,7 @@ const Places = () => {
                     type="text"
                     name="name"
                     placeholder="Search by name"
-                    value={filters.name}
+                    value={filters.p_name}
                     onChange={handleFilterChange}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                   />

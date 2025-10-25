@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
@@ -22,6 +21,8 @@ const Events = () => {
     name: "",
     dateRange: "",
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
 
   // Fetch all events from Supabase
   const fetchEvents = async () => {
@@ -81,6 +82,7 @@ const Events = () => {
     setFilteredEvents(result);
   }, [filters, events]);
 
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -103,20 +105,6 @@ const handleImageUpload = async (e) => {
 
     // Create unique file name
     const fileName = `${Date.now()}_${file.name}`;
-
-    // Upload to Supabase bucket "jaffnaexplore"
-   /* const { data, error: uploadError } = await supabase.storage
-      .from("jaffnaexplore")
-      .upload(fileName, file, { cacheControl: "3600", upsert: true }); // upsert:true to overwrite duplicates
-
-    if (uploadError) throw uploadError;
-
-    // Get public URL from the same bucket
-    const { publicUrl, error: urlError } = supabase.storage
-      .from("jaffnaexplore")
-      .getPublicUrl(fileName);
-
-    if (urlError) throw urlError;*/
 
   const { data: publicData, error: urlError } = supabase.storage
       .from('jaffnaexplore')
@@ -180,7 +168,10 @@ const handleImageUpload = async (e) => {
       )
     ) {
       setLoading(true);
-      const { error } = await supabase.from("events").delete().eq("event_id", event_id);
+      const { error } = await supabase
+        .from("events")
+        .delete()
+        .eq("event_id", event_id);
       if (error) {
         console.error("Error deleting event:", error.message);
         toast.error("Failed to delete event: " + error.message);
@@ -354,7 +345,7 @@ const handleImageUpload = async (e) => {
                   placeholder="Enter event description"
                   value={formData.e_description}
                   onChange={handleChange}
-                  rows={3}
+                  rows={5}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                   required
                   disabled={loading}
@@ -385,20 +376,6 @@ const handleImageUpload = async (e) => {
                     Uploading image...
                   </div>
                 )}
-
-                {/* Alternatively, keep URL input for external images */}
-                {/*<div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Or enter image URL</label>
-                  <input
-                    type="url"
-                    name="image_url"
-                    placeholder="https://example.com/image.jpg"
-                    value={formData.image_url}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    disabled={loading}
-                  />
-                </div>*/}
               </div>
 
               <div>

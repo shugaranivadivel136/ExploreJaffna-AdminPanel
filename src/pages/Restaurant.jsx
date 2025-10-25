@@ -390,7 +390,9 @@ const Restaurants = () => {
               </h3>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Restaurant Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Restaurant Name *
+                </label>
                 <input
                   type="text"
                   name="r_name"
@@ -404,7 +406,9 @@ const Restaurants = () => {
               </div>
 
                <div className="md:col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description *
+                </label>
                 <textarea
                   name="r_description"
                   placeholder="Enter restaurant description, menu highlights, specialties..."

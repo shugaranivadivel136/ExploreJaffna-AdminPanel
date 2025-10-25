@@ -38,29 +38,11 @@ import {
 } from "recharts";
 
 // Enhanced mock data
-const revenueData = [
-  {/* month: "Jan", revenue: 45000, visitors: 1200 },
-  { month: "Feb", revenue: 52000, visitors: 1400 },
-  { month: "Mar", revenue: 48000, visitors: 1300 },
-  { month: "Apr", revenue: 61000, visitors: 1800 },
-  { month: "May", revenue: 72000, visitors: 2100 },
-  { month: "Jun", revenue: 68000, visitors: 1900 },
-  { month: "Jul", revenue: 85000, visitors: 2500 */},
-];
+const revenueData = [];
 
-const destinationData = [
-  {/* name: "Jaffna Fort", bookings: 35, color: "#3B82F6" },
-  { name: "Nallur Temple", bookings: 28, color: "#EF4444" },
-  { name: "Casuarina Beach", bookings: 22, color: "#10B981" },
-  { name: "Nagadeepa", bookings: 15, color: "#F59E0B" */},
-];
+const destinationData = [];
 
-const activityData = [
-  {/* time: "2 min ago", event: "New booking received", type: "booking" },
-  { time: "5 min ago", event: "User review submitted", type: "review" },
-  { time: "1 hour ago", event: "Event published", type: "event" },
-  { time: "2 hours ago", event: "New destination added", type: "destination" */},
-];
+const activityData = [];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -68,8 +50,9 @@ const Dashboard = () => {
   // Navigation handlers
   const navigateToEvents = () => navigate("/events");
   const navigateToUsers = () => navigate("/users");
-  //const navigateToProducts = () => navigate("/products");
+  const navigateToNative_Products = () => navigate("/native_products");
   const navigateToPlaces = () => navigate("/places");
+  const navigateToRestaurants = () => navigate("/restaurants");
 
 
   return (
