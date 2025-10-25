@@ -347,11 +347,11 @@ const Restaurants = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-red-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-orange-600 to-red-600 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Restaurants Management</h1>
           <p className="text-orange-100">Add, edit, and manage restaurant listings</p>
         </div>
@@ -571,7 +571,7 @@ const Restaurants = () => {
 
           {/* Filter Section - Only shown when table is visible */}
           {isTableVisible && (
-            <div className="mb-6 bg-gradient-to-r from-pink-50 to-orange-50 p-5 rounded-xl border border-pink-100 shadow-sm">
+            <div className="mb-6 bg-linear-to-r from-pink-50 to-orange-50 p-5 rounded-xl border border-pink-100 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -675,7 +675,7 @@ const Restaurants = () => {
                         <tr key={restaurant.restaurant_id} className="hover:bg-gray-50 transition-colors">
                           <td className="p-4">
                             <div className="flex items-center">
-                              <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-md">
+                              <div className="h-12 w-16 shrink-0 overflow-hidden rounded-md">
                                 <img
                                   src={restaurant.image_url}
                                   alt={restaurant.r_name}
