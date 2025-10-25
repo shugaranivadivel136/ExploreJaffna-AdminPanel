@@ -46,7 +46,6 @@ const activityData = [];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
   // Navigation handlers
   const navigateToEvents = () => navigate("/events");
   const navigateToUsers = () => navigate("/users");

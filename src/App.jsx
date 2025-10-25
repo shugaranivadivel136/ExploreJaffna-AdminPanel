@@ -12,6 +12,7 @@ import Events from "./pages/Events";
 import Restaurants from "./pages/Restaurant";
 import Native_Products from "./pages/Native_Products";
 //import Users from "./pages/Users";
+import Native_Products from "./pages/Native_Products";
 
 const queryClient = new QueryClient();
 
