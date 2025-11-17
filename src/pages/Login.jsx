@@ -61,7 +61,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-blue-900 via-purple-900 to-indigo-900">
         <div className="absolute inset-0 bg-black/20"></div>
         
         {/* Animated Background Elements */}
@@ -76,13 +76,13 @@ const Login = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-6">
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <div className="w-16 h-16 bg-linear-to-r from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                   <Plane className="w-8 h-8 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-4 border-blue-900"></div>
               </div>
             </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-4">
+            <h1 className="text-5xl font-bold bg-linear-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-4">
               Yarl Wander Nest
             </h1>
             <p className="text-xl text-blue-100 max-w-md">
@@ -122,16 +122,16 @@ const Login = () => {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <div className="flex-1 flex items-center justify-center p-8 bg-linear-to-br from-slate-50 to-blue-50/30">
         <div className="w-full max-w-md">
           {/* Mobile Header */}
           <div className="text-center mb-8 lg:hidden">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 bg-linear-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Plane className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-linear-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
               Yarl Wander Nest
             </h1>
             <p className="text-gray-600 mt-2">Jaffna Tourism Management</p>
@@ -140,11 +140,11 @@ const Login = () => {
           <Card className="w-full shadow-2xl border-0 bg-white/70 backdrop-blur-sm">
             <CardHeader className="text-center pb-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 bg-linear-to-r from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
               </div>
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <CardTitle className="text-2xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 Admin Portal
               </CardTitle>
               <p className="text-gray-500 text-sm mt-2">
@@ -205,7 +205,7 @@ const Login = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-200 transform hover:-translate-y-0.5"
+                  className="w-full h-12 bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-200 transform hover:-translate-y-0.5"
                 >
                   {loading ? (
                     <div className="flex items-center space-x-2">
@@ -224,7 +224,7 @@ const Login = () => {
               {/* Security Notice */}
               <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
-                  <Shield className="w-4 h-4 text-cyan-600 mt-0.5 flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-cyan-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-cyan-800">Secure Access</p>
                     <p className="text-xs text-cyan-600 mt-1">

@@ -56,7 +56,7 @@ export function AppSidebar() {
           <div className="flex items-center gap-2">
             <Plane className="h-6 w-6 text-tourism-ocean" />
             {!isCollapsed && (
-              <span className="font-bold text-lg bg-gradient-to-r from-tourism-ocean to-tourism-sunset bg-clip-text text-transparent">
+              <span className="font-bold text-lg bg-linear-to-r from-tourism-ocean to-tourism-sunset bg-clip-text text-transparent">
                 TourismAdmin
               </span>
             )}

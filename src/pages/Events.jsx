@@ -274,11 +274,11 @@ const handleImageUpload = async (e) => {
   };
 
  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-700 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-purple-600 to-pink-700 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Events Management</h1>
           <p className="text-purple-100">Add, edit, and manage your events</p>
         </div>
@@ -469,7 +469,7 @@ const handleImageUpload = async (e) => {
 
           {/* Filter Section - Only shown when table is visible */}
           {isTableVisible && (
-            <div className="mb-6 bg-gradient-to-r from-pink-50 to-purple-50 p-5 rounded-xl border border-pink-100 shadow-sm">
+            <div className="mb-6 bg-linear-to-r from-pink-50 to-purple-50 p-5 rounded-xl border border-pink-100 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -638,7 +638,7 @@ const handleImageUpload = async (e) => {
                           >
                             <td className="p-4">
                               <div className="flex items-center">
-                                <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-md">
+                                <div className="h-12 w-16 shrink-0 overflow-hidden rounded-md">
                                   <img
                                     src={event.image_url}
                                     alt={event.e_name}

@@ -11,6 +11,8 @@ import Places from "./pages/Places";
 import Events from "./pages/Events";
 import Restaurants from "./pages/Restaurant";
 import Users from "./pages/Users";
+import Native_Products from "./pages/Native_Products";
+import Reivews from "./pages/Reviews";
 
 const queryClient = new QueryClient();
 

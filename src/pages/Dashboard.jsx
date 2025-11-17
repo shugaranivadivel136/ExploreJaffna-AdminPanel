@@ -56,11 +56,11 @@ const Dashboard = () => {
 
 
   return (
-    <div className="space-y-8 p-6 bg-gradient-to-br from-slate-50 to-blue-50/30 min-h-screen">
+    <div className="space-y-8 p-6 bg-linear-to-br from-slate-50 to-blue-50/30 min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-linear-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
             Dashboard Overview
           </h1>
           <p className="text-muted-foreground mt-2 flex items-center gap-2">
@@ -80,7 +80,7 @@ const Dashboard = () => {
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Events Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-blue-500 to-blue-600 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Events</CardTitle>
@@ -98,7 +98,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Users Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-500 to-pink-600 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-purple-500 to-pink-600 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Users</CardTitle>
@@ -116,7 +116,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Products Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-green-500 to-emerald-600 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Native Products</CardTitle>
@@ -134,7 +134,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Destinations Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-orange-500 to-red-500 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-orange-500 to-red-500 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Destinations</CardTitle>

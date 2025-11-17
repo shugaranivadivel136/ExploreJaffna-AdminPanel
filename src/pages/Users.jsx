@@ -198,11 +198,11 @@ export default function Users() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-purple-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Users Management</h1>
           <p className="text-blue-100">Manage and view all registered users from the mobile app</p>
         </div>
@@ -232,7 +232,7 @@ export default function Users() {
 
           {/* Filter Section - Only shown when table is visible */}
           {isTableVisible && (
-            <div className="mb-6 bg-gradient-to-r from-pink-50 to-orange-50 p-5 rounded-xl border border-pink-100 shadow-sm">
+            <div className="mb-6 bg-linear-to-r from-pink-50 to-orange-50 p-5 rounded-xl border border-pink-100 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <Filter className="h-5 w-5 mr-2 text-pink-600" />
                 Filter Users
@@ -332,7 +332,7 @@ export default function Users() {
                         <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                           <td className="p-4">
                             <div className="flex items-center">
-                              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                              <div className="w-10 h-10 bg-linear-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                 {user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
                               </div>
                               <div className="ml-4">
