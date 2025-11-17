@@ -12,7 +12,8 @@ import Events from "./pages/Events";
 import Restaurants from "./pages/Restaurant";
 import Users from "./pages/Users";
 import Native_Products from "./pages/Native_Products";
-import Reivews from "./pages/Reviews";
+//import Users from "./pages/Users";
+//import Native_Products from "./pages/Native_Products";
 
 const queryClient = new QueryClient();
 
