@@ -52,6 +52,7 @@ const Dashboard = () => {
   const navigateToNative_Products = () => navigate("/native_products");
   const navigateToPlaces = () => navigate("/places");
   const navigateToRestaurants = () => navigate("/restaurants");
+  const navigateToReviews = () => navigate("/reviews");
 
 
   return (

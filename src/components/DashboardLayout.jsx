@@ -53,7 +53,7 @@ export default function DashboardLayout() {
             Native Products
           </Link>
           <Link
-            to="/dashboard/user-reviews"
+            to="/dashboard/reviews"
             className="text-gray-700 hover:bg-gray-100 rounded px-3 py-2"
           >
             User Reviews
