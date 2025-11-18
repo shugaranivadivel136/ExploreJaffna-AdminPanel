@@ -513,7 +513,7 @@ const handleImageUpload = async (e) => {
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   >
                     <option value="">All Events</option>
-                    <option value="today">Today</option>
+                    <option value="today">Ongoing</option>
                     <option value="upcoming">Upcoming</option>
                     <option value="past">Past Events</option>
                   </select>

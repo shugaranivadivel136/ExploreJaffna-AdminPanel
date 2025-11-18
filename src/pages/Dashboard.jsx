@@ -610,7 +610,7 @@ const Dashboard = () => {
       <div className="relative overflow-hidden shadow-xl h-100 overflow-y-auto">
 
         <div 
-          className="absolute inset-0 bg-cover bg-center min-h-[1500px]"
+          className="absolute inset-0 bg-cover bg-center min-h-[800px]"
           style={{ backgroundImage: `url(${dashboardHeader})` }}
         >
           {/* Dark overlay for better text readability */}
