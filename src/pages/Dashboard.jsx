@@ -105,12 +105,12 @@ const Dashboard = () => {
   // Fetch recent activities from database
   const fetchRecentActivities = async () => {
     try {
-      // Fetch recent reviews
+      // Fetch recent reviews count
       const { data: recentReviews, error: reviewsError } = await supabase
         .from('reviews')
-        .select('rating, created_at')
+        .select('created_at')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10);
 
       // Fetch recently added places
       const { data: recentPlaces, error: placesError } = await supabase
@@ -140,12 +140,12 @@ const Dashboard = () => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Fetch recent reports
+      // Fetch recent reports count
       const { data: recentReports, error: reportsError } = await supabase
         .from('reports')
-        .select('problems, created_at, profiles(username)')
+        .select('created_at')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10);
 
       if (reviewsError || placesError || eventsError || productsError || usersError || reportsError) {
         throw new Error('Error fetching recent activities');
@@ -154,15 +154,27 @@ const Dashboard = () => {
       // Combine all activities and sort by creation date
       const activities = [];
 
-      // Add review activities
-      if (recentReviews) {
-        recentReviews.forEach(review => {
-          activities.push({
-            type: 'review',
-            event: `New ${review.rating}-star review received`,
-            time: getTimeAgo(review.created_at),
-            created_at: review.created_at
-          });
+      // Add review activities - show count of recent reviews
+      if (recentReviews && recentReviews.length > 0) {
+        const reviewCount = recentReviews.length;
+        const latestReviewTime = recentReviews[0].created_at;
+        activities.push({
+          type: 'review',
+          event: `We have got ${reviewCount} new reviews from users`,
+          time: getTimeAgo(latestReviewTime),
+          created_at: latestReviewTime
+        });
+      }
+
+      // Add report activities - show count of recent reports
+      if (recentReports && recentReports.length > 0) {
+        const reportCount = recentReports.length;
+        const latestReportTime = recentReports[0].created_at;
+        activities.push({
+          type: 'report',
+          event: `We have got ${reportCount} reports from users`,
+          time: getTimeAgo(latestReportTime),
+          created_at: latestReportTime
         });
       }
 
@@ -210,18 +222,6 @@ const Dashboard = () => {
             event: `New user "${user.username}" registered`,
             time: getTimeAgo(user.created_at),
             created_at: user.created_at
-          });
-        });
-      }
-
-      // Add report activities
-      if (recentReports) {
-        recentReports.forEach(report => {
-          activities.push({
-            type: 'report',
-            event: `New report: "${report.problems}" from ${report.profiles?.username || 'Unknown User'}`,
-            time: getTimeAgo(report.created_at),
-            created_at: report.created_at
           });
         });
       }
@@ -549,7 +549,7 @@ const Dashboard = () => {
           if (payload.eventType === 'INSERT') {
             // Show popup for new review
             const newReview = payload.new;
-            alert(`New ${newReview.rating}-star review has been received!`);
+            alert(`We have got new reviews from users!`);
           }
         }
       )
@@ -569,20 +569,7 @@ const Dashboard = () => {
           fetchRecentActivities();
           if (payload.eventType === 'INSERT') {
             // Show popup for new report
-            const newReport = payload.new;
-            // Fetch user details for the report
-            supabase
-              .from('profiles')
-              .select('username')
-              .eq('id', newReport.user_id)
-              .single()
-              .then(({ data: userData }) => {
-                const username = userData?.username || 'Unknown User';
-                alert(`New report received from ${username}: "${newReport.problems}"`);
-              })
-              .catch(() => {
-                alert(`New report received: "${newReport.problems}"`);
-              });
+            alert(`We have got new reports from users!`);
           }
         }
       )
