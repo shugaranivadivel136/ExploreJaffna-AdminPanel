@@ -73,6 +73,20 @@ const Places = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handle filter changes
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      category_name: "",
+      name: ""
+    });
+  };
+
   // Handle image file
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -248,13 +262,13 @@ const Places = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-50 to-green-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 to-emerald-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-linear-to-r from-green-600 to-green-600 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-emerald-700 to-emerald-700 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Places Management</h1>
-          <p className="text-green-100">Add, edit, and manage place listings</p>
+          <p className="text-emerald-100">Add, edit, and manage place listings</p>
         </div>
 
         <div className="p-6 md:p-8">
@@ -264,25 +278,94 @@ const Places = () => {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setIsFormVisible(!isFormVisible)}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 {isFormVisible ? "Hide Form ▲" : "Add New Place ▼"}
               </button>
               <button
                 onClick={() => setIsTableVisible(!isTableVisible)}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 {isTableVisible ? "Hide Places ▲" : "View All Places ▼"}
               </button>
             </div>
           </div>
 
+          {/* Filter Section */}
+          {isTableVisible && (
+            <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <div className="flex flex-col sm:flex-row gap-4 items-end">
+                {/* Category Filter */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Filter by Category
+                  </label>
+                  <select
+                    name="category_name"
+                    value={filters.category_name}
+                    onChange={handleFilterChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((category, index) => (
+                      <option key={index} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Name Filter */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Filter by Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Search place name..."
+                    value={filters.name}
+                    onChange={handleFilterChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Clear Filters Button */}
+                <div>
+                  <button
+                    onClick={clearFilters}
+                    className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+
+              {/* Active Filters Info */}
+              {(filters.category_name || filters.name) && (
+                <div className="mt-3 text-sm text-gray-600">
+                  <span className="font-medium">Active filters:</span>
+                  {filters.category_name && (
+                    <span className="ml-2 px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs">
+                      Category: {filters.category_name}
+                    </span>
+                  )}
+                  {filters.name && (
+                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      Name: {filters.name}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Add/Edit Form */}
           {isFormVisible && (
             <form
               id="place-form"
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 bg-green-50 p-6 rounded-xl border border-green-100"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 bg-emerald-50 p-6 rounded-xl border border-emerald-100"
             >
               <h3 className="text-lg font-semibold text-gray-800 col-span-full mb-2">
                 {editingId ? `Editing: ${formData.p_name}` : "Add New Place"}
@@ -299,7 +382,7 @@ const Places = () => {
                   placeholder="Enter place name"
                   value={formData.p_name}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                   required
                 />
               </div>
@@ -314,7 +397,7 @@ const Places = () => {
                   name="category_name"
                   value={formData.category_name}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                   required
                   list="category-list"
                 />
@@ -336,7 +419,7 @@ const Places = () => {
                   step="any"
                   value={formData.latitude}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                   required
                 />
               </div>
@@ -351,7 +434,7 @@ const Places = () => {
                   step="any"
                   value={formData.longitude}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                   required
                 />
               </div>
@@ -366,7 +449,7 @@ const Places = () => {
                   value={formData.p_description}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                   required
                 ></textarea>
               </div>
@@ -388,7 +471,7 @@ const Places = () => {
                   name="image_url"
                   value={formData.image_url}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                   disabled={!!imageFile}
                 />
               </div>
@@ -408,7 +491,7 @@ const Places = () => {
               <div className="col-span-full flex gap-3">
                 <button
                   type="submit"
-                  className="bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700"
+                  className="bg-emerald-600 text-white py-3 px-6 rounded-lg hover:bg-emerald-700"
                   disabled={loading}
                 >
                   {editingId ? "Update Place" : "Add Place"}
@@ -428,7 +511,9 @@ const Places = () => {
           {isTableVisible && (
             <div className="overflow-hidden border rounded-xl shadow-sm">
               {filteredPlaces.length === 0 ? (
-                <div className="text-center p-10 text-gray-500">No places found</div>
+                <div className="text-center p-10 text-gray-500">
+                  {places.length === 0 ? "No places found" : "No places match your filters"}
+                </div>
               ) : (
                 <table className="w-full">
                   <thead className="bg-gray-100">
@@ -453,7 +538,7 @@ const Places = () => {
                         </td>
                         <td className="p-4 text-sm text-gray-700 line-clamp-2">{place.p_description}</td>
                         <td className="p-4">
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                          <span className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium">
                             {place.category_name}
                           </span>
                         </td>
@@ -469,7 +554,7 @@ const Places = () => {
                           </button>
                           <button
                             onClick={() => handleDelete(place.place_id)}
-                            className="text-green-600 hover:text-green-800"
+                            className="text-emerald-600 hover:text-emerald-800"
                           >
                             🗑
                           </button>

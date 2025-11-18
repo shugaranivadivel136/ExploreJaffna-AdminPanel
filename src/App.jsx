@@ -12,8 +12,8 @@ import Events from "./pages/Events";
 import Restaurants from "./pages/Restaurant";
 import Users from "./pages/Users";
 import Native_Products from "./pages/Native_Products";
-//import Users from "./pages/Users";
-//import Native_Products from "./pages/Native_Products";
+import Reivews from "./pages/Reviews";
+import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +34,7 @@ const App = () => (
             <Route path="native_products" element={<Native_Products />} />
             <Route path="reviews" element={<Reivews />} />
             <Route path="users" element={<Users />} />
+            <Route path="reports" element={<Reports />} />
             <Route path="analytics" element={<div className="p-6">Analytics Page</div>} />
             {/*<Route path="bookings" element={<div className="p-6">Bookings Page</div>} />
             <Route path="destinations" element={<div className="p-6">Destinations Page</div>} />

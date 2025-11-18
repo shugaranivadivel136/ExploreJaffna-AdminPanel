@@ -32,7 +32,6 @@ const menuItems = [
   { title: "Users", url: "/dashboard/users", icon: Users },
   { title: "User Reviews", url: "/dashboard/reviews", icon: Users },
   { title: "Revenue", url: "/dashboard/revenue", icon: TrendingUp },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
 export function AppSidebar() {

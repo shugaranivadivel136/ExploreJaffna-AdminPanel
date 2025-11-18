@@ -165,8 +165,8 @@ export default function Users() {
       <div className="flex items-center gap-2">
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
           isAdmin 
-            ? 'bg-purple-100 text-purple-800 border border-purple-200' 
-            : 'bg-blue-100 text-blue-800 border border-blue-200'
+            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+            : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
         }`}>
           {isAdmin ? (
             <Shield className="w-3 h-3 mr-1" />
@@ -198,13 +198,13 @@ export default function Users() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-purple-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 to-emerald-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-emerald-700 to-emerald-700 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Users Management</h1>
-          <p className="text-blue-100">Manage and view all registered users from the mobile app</p>
+          <p className="text-emerald-100">Manage and view all registered users from the mobile app</p>
         </div>
         
         <div className="p-6 md:p-8">
@@ -215,14 +215,14 @@ export default function Users() {
               <button
                 onClick={fetchUsers}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 disabled:bg-emerald-400 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 {loading ? 'Refreshing...' : 'Refresh Users'}
               </button>
               <button
                 onClick={toggleTableVisibility}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 <span className="mr-2">{isTableVisible ? '▲' : '▼'}</span>
                 {isTableVisible ? 'Hide Users' : 'View All Users'}
@@ -232,7 +232,7 @@ export default function Users() {
 
           {/* Filter Section - Only shown when table is visible */}
           {isTableVisible && (
-            <div className="mb-6 bg-linear-to-r from-pink-50 to-orange-50 p-5 rounded-xl border border-pink-100 shadow-sm">
+            <div className="mb-6 bg-linear-to-r from-emerald-50 to-emerald-50 p-5 rounded-xl border border-emerald-100 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <Filter className="h-5 w-5 mr-2 text-pink-600" />
                 Filter Users
@@ -289,7 +289,7 @@ export default function Users() {
           {/* Users List - Only shown when table is visible */}
           {isTableVisible && (loading && !users.length ? (
             <div className="flex justify-center items-center h-64 bg-gray-50 rounded-xl">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
             </div>
           ) : (
             <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
@@ -307,7 +307,7 @@ export default function Users() {
                   {(filters.search || filters.status !== "all") && (
                     <button
                       onClick={clearFilters}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                     >
                       Clear Filters
                     </button>
@@ -332,7 +332,7 @@ export default function Users() {
                         <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                           <td className="p-4">
                             <div className="flex items-center">
-                              <div className="w-10 h-10 bg-linear-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                              <div className="w-10 h-10 bg-linear-to-r from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                 {user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
                               </div>
                               <div className="ml-4">
@@ -347,7 +347,7 @@ export default function Users() {
                           </td>
                           <td className="p-4 text-sm text-gray-700 hidden md:table-cell">
                             <div className="flex items-center">
-                              <Mail className="w-4 h-4 mr-2 text-blue-500" />
+                              <Mail className="w-4 h-4 mr-2 text-emerald-500" />
                               <span className="truncate">{user.email}</span>
                             </div>
                             {user.phone && (

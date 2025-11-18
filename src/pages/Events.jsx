@@ -274,13 +274,13 @@ const handleImageUpload = async (e) => {
   };
 
  return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 to-emerald-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-linear-to-r from-purple-600 to-pink-700 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-emerald-700 to-emerald-700 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Events Management</h1>
-          <p className="text-purple-100">Add, edit, and manage your events</p>
+          <p className="text-emerald-100">Add, edit, and manage your events</p>
         </div>
 
         <div className="p-6 md:p-8">
@@ -292,14 +292,14 @@ const handleImageUpload = async (e) => {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={toggleFormVisibility}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 <span className="mr-2">{isFormVisible ? "▲" : "▼"}</span>
                 {isFormVisible ? "Hide Form" : "Add New Event"}
               </button>
               <button
                 onClick={toggleTableVisibility}
-                className="bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 <span className="mr-2">{isTableVisible ? "▲" : "▼"}</span>
                 {isTableVisible ? "Hide Events" : "View All Events"}
@@ -312,7 +312,7 @@ const handleImageUpload = async (e) => {
             <form
               id="event-form"
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 bg-purple-50 p-6 rounded-xl border border-purple-100"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 bg-white p-6 rounded-xl border"
             >
               <h3 className="text-lg font-semibold text-gray-800 col-span-full mb-2">
                 {editingId
@@ -330,7 +330,7 @@ const handleImageUpload = async (e) => {
                   placeholder="Enter event name"
                   value={formData.e_name}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -346,7 +346,7 @@ const handleImageUpload = async (e) => {
                   value={formData.e_description}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -361,7 +361,7 @@ const handleImageUpload = async (e) => {
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                     disabled={uploading || loading}
                   />
                   <div className="text-xs text-gray-500">
@@ -371,8 +371,8 @@ const handleImageUpload = async (e) => {
 
                 {/* Show upload status */}
                 {uploading && (
-                  <div className="mt-2 flex items-center text-sm text-purple-600">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2"></div>
+                  <div className="mt-2 flex items-center text-sm text-emerald-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600 mr-2"></div>
                     Uploading image...
                   </div>
                 )}
@@ -387,7 +387,7 @@ const handleImageUpload = async (e) => {
                   name="start_date"
                   value={formData.start_date}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -402,7 +402,7 @@ const handleImageUpload = async (e) => {
                   name="end_date"
                   value={formData.end_date}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   disabled={loading}
                 />
               </div>
@@ -430,7 +430,7 @@ const handleImageUpload = async (e) => {
               <div className="col-span-full flex flex-wrap gap-3 pt-2">
                 <button
                   type="submit"
-                  className="bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:bg-purple-300 transition-colors flex items-center"
+                  className="bg-emerald-700 text-white py-3 px-6 rounded-lg hover:bg-emerald-900 disabled:bg-emerald-500 transition-colors flex items-center"
                   disabled={loading || uploading}
                 >
                   {loading ? (
@@ -469,11 +469,11 @@ const handleImageUpload = async (e) => {
 
           {/* Filter Section - Only shown when table is visible */}
           {isTableVisible && (
-            <div className="mb-6 bg-linear-to-r from-pink-50 to-purple-50 p-5 rounded-xl border border-pink-100 shadow-sm">
+            <div className="mb-6 bg-linear-to-r from-emerald-50 to-emerald-50 p-5 rounded-xl border border-emerald-50 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-pink-600"
+                  className="h-5 w-5 mr-2 text-emerald-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -489,7 +489,7 @@ const handleImageUpload = async (e) => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Event Name
                   </label>
                   <input
@@ -498,19 +498,19 @@ const handleImageUpload = async (e) => {
                     placeholder="Search by name"
                     value={filters.name}
                     onChange={handleFilterChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Date Range
                   </label>
                   <select
                     name="dateRange"
                     value={filters.dateRange}
                     onChange={handleFilterChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   >
                     <option value="">All Events</option>
                     <option value="today">Today</option>
@@ -522,7 +522,7 @@ const handleImageUpload = async (e) => {
                 <div className="flex items-end">
                   <button
                     onClick={clearFilters}
-                    className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center"
+                    className="w-full bg-gray-400 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-500 transition-colors flex items-center justify-center"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -543,7 +543,7 @@ const handleImageUpload = async (e) => {
                 </div>
               </div>
 
-              <div className="mt-4 text-sm text-pink-700 flex items-center">
+              <div className="mt-4 text-sm text-emerald-700 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 mr-1"
@@ -567,7 +567,7 @@ const handleImageUpload = async (e) => {
           {isTableVisible &&
             (loading && !events.length ? (
               <div className="flex justify-center items-center h-64 bg-gray-50 rounded-xl">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
               </div>
             ) : (
               <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
@@ -602,7 +602,7 @@ const handleImageUpload = async (e) => {
                     {events.length === 0 && (
                       <button
                         onClick={() => setIsFormVisible(true)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                        className="bg-emerald-700 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                       >
                         Add Your First Event
                       </button>
@@ -690,7 +690,7 @@ const handleImageUpload = async (e) => {
                               <div className="flex justify-center space-x-2">
                                 <button
                                   onClick={() => handleEdit(event)}
-                                  className="text-purple-600 hover:text-purple-800 transition-colors p-1 rounded-md hover:bg-purple-50"
+                                  className="text-emerald-600 hover:text-emerald-800 transition-colors p-1 rounded-md hover:bg-emerald-50"
                                   title="Edit"
                                   disabled={loading}
                                 >

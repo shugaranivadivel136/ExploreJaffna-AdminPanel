@@ -217,13 +217,13 @@ const Native_Products = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-50 to-blue-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 to-emerald-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-linear-to-r from-green-600 to-blue-700 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-emerald-700 to-emerald-700 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Native products Management</h1>
-          <p className="text-green-100">Add, edit, and manage your products</p>
+          <p className="text-emerald-100">Add, edit, and manage your products</p>
         </div>
 
         <div className="p-6 md:p-8">
@@ -235,14 +235,14 @@ const Native_Products = () => {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={toggleFormVisibility}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
                 >
                 <span className="mr-2">{isFormVisible ? "▲" : "▼"}</span>
                 {isFormVisible ? "Hide Form" : "Add New Product"}
                 </button>
               <button
                 onClick={toggleTableVisibility}
-                className="bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
                 >
                 <span className="mr-2">{isTableVisible ? "▲" : "▼"}</span>
                 {isTableVisible ? "Hide Products" : "View All Products"}
@@ -255,7 +255,7 @@ const Native_Products = () => {
             <form
               id="native_product-form"
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 bg-purple-50 p-6 rounded-xl border border-purple-100"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 bg-emerald-50 p-6 rounded-xl border border-emerald-100"
             >
                <h3 className="text-lg font-semibold text-gray-800 col-span-full mb-2">
                 {editingId
@@ -273,7 +273,7 @@ const Native_Products = () => {
                   placeholder="Enter product name"
                   value={formData.pro_name}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -289,7 +289,7 @@ const Native_Products = () => {
                   value={formData.pro_craft_tec}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -304,7 +304,7 @@ const Native_Products = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                     disabled={uploading || loading}
                   />
                   <div className="text-xs text-gray-500">
@@ -314,8 +314,8 @@ const Native_Products = () => {
 
                 {/* Show upload status */}
                 {uploading && (
-                  <div className="mt-2 flex items-center text-sm text-purple-600">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2"></div>
+                  <div className="mt-2 flex items-center text-sm text-emerald-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600 mr-2"></div>
                     Uploading image...
                   </div>
                 )}
@@ -344,7 +344,7 @@ const Native_Products = () => {
               <div className="col-span-full flex flex-wrap gap-3 pt-2">
                 <button
                   type="submit"
-                  className="bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:bg-purple-300 transition-colors flex items-center"
+                  className="bg-emerald-600 text-white py-3 px-6 rounded-lg hover:bg-emerald-700 disabled:bg-emerald-300 transition-colors flex items-center"
                   disabled={loading || uploading}
                 >
                   {loading ? (
@@ -376,11 +376,11 @@ const Native_Products = () => {
 
           {/* Filter section - only shown when table is visible */}
           {isTableVisible && (
-            <div className="mb-6 bg-linear-to-r from-pink-50 to-green-50 p-5 rounded-xl border border-pink-100 shadow-sm">
+            <div className="mb-6 bg-linear-to-r from-emerald-50 to-emerald-50 p-5 rounded-xl border border-emerald-100 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-pink-600"
+                  className="h-5 w-5 mr-2 text-emerald-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -405,7 +405,7 @@ const Native_Products = () => {
                     placeholder="Search by name"
                     value={filters.pro_name}
                     onChange={handleFilterChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   />
                 </div>
 
@@ -433,7 +433,7 @@ const Native_Products = () => {
                 </div>
               </div>
 
-              <div className="mt-4 text-sm text-pink-700 flex items-center">
+              <div className="mt-4 text-sm text-emerald-700 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 mr-1"
@@ -457,7 +457,7 @@ const Native_Products = () => {
           {isTableVisible &&
             (loading && !native_products.length ? (
               <div className="flex justify-center items-center h-64 bg-gray-50 rounded-xl">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
               </div>
             ) : (
               <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
@@ -492,7 +492,7 @@ const Native_Products = () => {
                     {native_products.length === 0 && (
                       <button
                         onClick={() => setIsFormVisible(true)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                       >
                         Add Your First Products
                       </button>
@@ -544,7 +544,7 @@ const Native_Products = () => {
                               <div className="flex justify-center space-x-2">
                                 <button
                                   onClick={() => handleEdit(product)}
-                                  className="text-purple-600 hover:text-purple-800 transition-colors p-1 rounded-md hover:bg-purple-50"
+                                  className="text-blue-600 hover:text-blue-800 transition-colors p-1 rounded-md hover:bg-emerald-50"
                                   title="Editing"
                                   disabled={loading}
                                 >

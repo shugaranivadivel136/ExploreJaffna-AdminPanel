@@ -4,7 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
-  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
+  const [filteemeraldRestaurants, setFilteemeraldRestaurants] = useState([]);
   const [formData, setFormData] = useState({
     r_name: "",
     r_description: "",
@@ -40,7 +40,7 @@ const Restaurants = () => {
       return;
     } 
     setRestaurants(data || []);
-    setFilteredRestaurants(data || []);
+    setFilteemeraldRestaurants(data || []);
     
     // Extract unique restaurant types
     const uniqueTypes = [...new Set(data.map(restaurant => restaurant.restaurant_type))];
@@ -69,7 +69,7 @@ const Restaurants = () => {
       );
     }
     
-    setFilteredRestaurants(result);
+    setFilteemeraldRestaurants(result);
   }, [filters, restaurants]);
 
   // Handle form input changes
@@ -153,7 +153,7 @@ const Restaurants = () => {
   const validateForm = () => {
     if (!formData.r_name || !formData.latitude || !formData.longitude || 
         !formData.r_description || !formData.restaurant_type) {
-      toast.error("Please fill in all required fields.");
+      toast.error("Please fill in all requiemerald fields.");
       return false;
     }
     
@@ -347,13 +347,13 @@ const Restaurants = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-orange-50 to-red-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 to-emerald-50 p-4 md:p-6">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-linear-to-r from-orange-600 to-red-600 text-white p-6 md:p-8">
+        <div className="bg-linear-to-r from-emerald-700 to-emerald-700 text-white p-6 md:p-8">
           <h1 className="text-3xl font-bold mb-2">Restaurants Management</h1>
-          <p className="text-orange-100">Add, edit, and manage restaurant listings</p>
+          <p className="text-emerald-100">Add, edit, and manage restaurant listings</p>
         </div>
         
         <div className="p-6 md:p-8">
@@ -363,14 +363,14 @@ const Restaurants = () => {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={toggleFormVisibility}
-                className="bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 <span className="mr-2">{isFormVisible ? '▲' : '▼'}</span>
                 {isFormVisible ? 'Hide Form' : 'Add New Restaurant'}
               </button>
               <button
                 onClick={toggleTableVisibility}
-                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
               >
                 <span className="mr-2">{isTableVisible ? '▲' : '▼'}</span>
                 {isTableVisible ? 'Hide Restaurants' : 'View All Restaurants'}
@@ -383,7 +383,7 @@ const Restaurants = () => {
             <form 
               id="restaurant-form"
               onSubmit={handleSubmit} 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 bg-orange-50 p-6 rounded-xl border border-orange-100"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 bg-emerald-50 p-6 rounded-xl border border-emerald-100"
             >
               <h3 className="text-lg font-semibold text-gray-800 col-span-full mb-2">
                 {editingId ? `Editing Restaurant: ${formData.r_name}` : 'Add New Restaurant'}
@@ -399,7 +399,7 @@ const Restaurants = () => {
                   placeholder="Enter restaurant name"
                   value={formData.r_name}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -415,7 +415,7 @@ const Restaurants = () => {
                   value={formData.r_description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -429,7 +429,7 @@ const Restaurants = () => {
                   placeholder="e.g., Non Veg, Veg, Italian, Chinese"
                   value={formData.restaurant_type}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                   list="restaurant-types-list"
@@ -449,7 +449,7 @@ const Restaurants = () => {
                   placeholder="https://example.com"
                   value={formData.official_website}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   disabled={loading}
                 />
               </div>
@@ -463,7 +463,7 @@ const Restaurants = () => {
                   placeholder="e.g., 40.7128"
                   value={formData.latitude}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -478,7 +478,7 @@ const Restaurants = () => {
                   placeholder="e.g., -74.0060"
                   value={formData.longitude}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   required
                   disabled={loading}
                 />
@@ -491,7 +491,7 @@ const Restaurants = () => {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   disabled={loading}
                 />
                 <p className="text-xs text-gray-500 mt-1">OR use Image URL below (Max 5MB)</p>
@@ -506,7 +506,7 @@ const Restaurants = () => {
                   placeholder="https://example.com/restaurant-image.jpg"
                   value={formData.image_url}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   disabled={loading || imageFile}
                 />
                 <p className="text-xs text-gray-500 mt-1">Leave empty if uploading image</p>
@@ -535,7 +535,7 @@ const Restaurants = () => {
               <div className="col-span-full flex flex-wrap gap-3 pt-2">
                 <button
                   type="submit"
-                  className="bg-orange-600 text-white py-3 px-6 rounded-lg hover:bg-orange-700 disabled:bg-orange-300 transition-colors flex items-center"
+                  className="bg-emerald-600 text-white py-3 px-6 rounded-lg hover:bg-emerald-700 disabled:bg-emerald-300 transition-colors flex items-center"
                   disabled={loading}
                 >
                   {loading ? (
@@ -564,14 +564,14 @@ const Restaurants = () => {
               </div>
               
               <div className="col-span-full text-xs text-gray-500 mt-2">
-                <p>* Required fields. You can either upload an image or provide an image URL.</p>
+                <p>* Requiemerald fields. You can either upload an image or provide an image URL.</p>
               </div>
             </form>
           )}
 
           {/* Filter Section - Only shown when table is visible */}
           {isTableVisible && (
-            <div className="mb-6 bg-linear-to-r from-pink-50 to-orange-50 p-5 rounded-xl border border-pink-100 shadow-sm">
+            <div className="mb-6 bg-linear-to-r from-emerald-50 to-emerald-50 p-5 rounded-xl border border-emerald-100 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -585,7 +585,7 @@ const Restaurants = () => {
                     name="restaurant_type"
                     value={filters.restaurant_type}
                     onChange={handleFilterChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   >
                     <option value="">All Types</option>
                     {restaurantTypes.map((type, index) => (
@@ -602,7 +602,7 @@ const Restaurants = () => {
                     placeholder="Search by name"
                     value={filters.name}
                     onChange={handleFilterChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   />
                 </div>
                 
@@ -623,7 +623,7 @@ const Restaurants = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Showing {filteredRestaurants.length} of {restaurants.length} restaurants
+                Showing {filteemeraldRestaurants.length} of {restaurants.length} restaurants
               </div>
             </div>
           )}
@@ -631,11 +631,11 @@ const Restaurants = () => {
           {/* Restaurants List - Only shown when table is visible */}
           {isTableVisible && (loading && !restaurants.length ? (
             <div className="flex justify-center items-center h-64 bg-gray-50 rounded-xl">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
             </div>
           ) : (
             <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-              {filteredRestaurants.length === 0 ? (
+              {filteemeraldRestaurants.length === 0 ? (
                 <div className="text-center py-16 bg-gray-50 rounded-lg">
                   <div className="text-gray-400 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -651,7 +651,7 @@ const Restaurants = () => {
                   {restaurants.length === 0 && (
                     <button
                       onClick={() => setIsFormVisible(true)}
-                      className="bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                      className="bg-emerald-700 hover:bg-emerald-900 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                     >
                       Add Your First Restaurant
                     </button>
@@ -671,7 +671,7 @@ const Restaurants = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {filteredRestaurants.map((restaurant) => (
+                      {filteemeraldRestaurants.map((restaurant) => (
                         <tr key={restaurant.restaurant_id} className="hover:bg-gray-50 transition-colors">
                           <td className="p-4">
                             <div className="flex items-center">
@@ -695,7 +695,7 @@ const Restaurants = () => {
                             <div className="line-clamp-2">{restaurant.r_description}</div>
                           </td>
                           <td className="p-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                               {restaurant.restaurant_type}
                             </span>
                           </td>
@@ -730,7 +730,7 @@ const Restaurants = () => {
                               </button>
                               <button
                                 onClick={() => handleDelete(restaurant.restaurant_id)}
-                                className="text-red-600 hover:text-red-800 transition-colors p-1 rounded-md hover:bg-red-50"
+                                className="text-red-600 hover:text-red-800 transition-colors p-1 rounded-md hover:bg-emerald-50"
                                 title="Delete"
                                 disabled={loading}
                               >

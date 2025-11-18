@@ -19,6 +19,7 @@ import {
   PieChart as PieChartIcon,
   Package,
   Navigation,
+  AlertTriangle,
 } from "lucide-react";
 import {
   AreaChart,
@@ -36,117 +37,721 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import { supabase } from "../supabaseClient";
+import { useState, useEffect } from "react";
 
-// Enhanced mock data
-const revenueData = [];
+// Import your image from the assets folder
+import dashboardHeader from "../assets/logos.png";
 
-const destinationData = [];
-
-const activityData = [];
+// Colors for the pie chart
+const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  // Navigation handlers
-  const navigateToEvents = () => navigate("/events");
-  const navigateToUsers = () => navigate("/users");
-  const navigateToNative_Products = () => navigate("/native_products");
-  const navigateToPlaces = () => navigate("/places");
-  const navigateToRestaurants = () => navigate("/restaurants");
-  const navigateToReviews = () => navigate("/reviews");
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalEvents: 0,
+    totalPlaces: 0,
+    totalRestaurants: 0,
+    totalProducts: 0,
+    totalReviews: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [destinationData, setDestinationData] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [userGrowthData, setUserGrowthData] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
 
+  // Function to format time ago
+  const getTimeAgo = (timestamp) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+  };
+
+  // Function to get overall average rating from all reviews
+  const getOverallAverageRating = async () => {
+    try {
+      const { data: reviews, error } = await supabase
+        .from('reviews')
+        .select('rating');
+
+      if (error) {
+        console.error('Error fetching reviews for average rating:', error);
+        return 0;
+      }
+
+      if (!reviews || reviews.length === 0) {
+        return 0;
+      }
+
+      const totalRating = reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+      const average = totalRating / reviews.length;
+      
+      return parseFloat(average.toFixed(1));
+
+    } catch (error) {
+      console.error('Error in getOverallAverageRating:', error);
+      return 0;
+    }
+  };
+
+  // Fetch recent activities from database
+  const fetchRecentActivities = async () => {
+    try {
+      // Fetch recent reviews
+      const { data: recentReviews, error: reviewsError } = await supabase
+        .from('reviews')
+        .select('rating, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Fetch recently added places
+      const { data: recentPlaces, error: placesError } = await supabase
+        .from('places')
+        .select('p_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Fetch recently added events
+      const { data: recentEvents, error: eventsError } = await supabase
+        .from('events')
+        .select('event_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Fetch recently added native products
+      const { data: recentProducts, error: productsError } = await supabase
+        .from('native_products')
+        .select('product_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Fetch recently registered users
+      const { data: recentUsers, error: usersError } = await supabase
+        .from('profiles')
+        .select('username, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Fetch recent reports
+      const { data: recentReports, error: reportsError } = await supabase
+        .from('reports')
+        .select('problems, created_at, profiles(username)')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (reviewsError || placesError || eventsError || productsError || usersError || reportsError) {
+        throw new Error('Error fetching recent activities');
+      }
+
+      // Combine all activities and sort by creation date
+      const activities = [];
+
+      // Add review activities
+      if (recentReviews) {
+        recentReviews.forEach(review => {
+          activities.push({
+            type: 'review',
+            event: `New ${review.rating}-star review received`,
+            time: getTimeAgo(review.created_at),
+            created_at: review.created_at
+          });
+        });
+      }
+
+      // Add place activities
+      if (recentPlaces) {
+        recentPlaces.forEach(place => {
+          activities.push({
+            type: 'destination',
+            event: `New destination "${place.p_name}" published`,
+            time: getTimeAgo(place.created_at),
+            created_at: place.created_at
+          });
+        });
+      }
+
+      // Add event activities
+      if (recentEvents) {
+        recentEvents.forEach(event => {
+          activities.push({
+            type: 'event',
+            event: `New event "${event.event_name}" added`,
+            time: getTimeAgo(event.created_at),
+            created_at: event.created_at
+          });
+        });
+      }
+
+      // Add product activities
+      if (recentProducts) {
+        recentProducts.forEach(product => {
+          activities.push({
+            type: 'product',
+            event: `New native product "${product.product_name}" added`,
+            time: getTimeAgo(product.created_at),
+            created_at: product.created_at
+          });
+        });
+      }
+
+      // Add user activities
+      if (recentUsers) {
+        recentUsers.forEach(user => {
+          activities.push({
+            type: 'user',
+            event: `New user "${user.username}" registered`,
+            time: getTimeAgo(user.created_at),
+            created_at: user.created_at
+          });
+        });
+      }
+
+      // Add report activities
+      if (recentReports) {
+        recentReports.forEach(report => {
+          activities.push({
+            type: 'report',
+            event: `New report: "${report.problems}" from ${report.profiles?.username || 'Unknown User'}`,
+            time: getTimeAgo(report.created_at),
+            created_at: report.created_at
+          });
+        });
+      }
+
+      // Sort by creation date (newest first) and get top 5
+      const sortedActivities = activities
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 5);
+
+      setRecentActivities(sortedActivities);
+
+    } catch (error) {
+      console.error('Error fetching recent activities:', error);
+      // Fallback to empty array if there's an error
+      setRecentActivities([]);
+    }
+  };
+
+  // Fetch user growth data by month
+  const fetchUserGrowthData = async () => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('created_at')
+        .order('created_at');
+
+      if (error) {
+        throw error;
+      }
+
+      if (!profiles || profiles.length === 0) {
+        setUserGrowthData([]);
+        return;
+      }
+
+      // Group users by month and year
+      const monthlyData = {};
+      
+      profiles.forEach(profile => {
+        const date = new Date(profile.created_at);
+        const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        
+        if (!monthlyData[monthYear]) {
+          monthlyData[monthYear] = {
+            month: monthName,
+            users: 0,
+            fullDate: date
+          };
+        }
+        monthlyData[monthYear].users += 1;
+      });
+
+      // Convert to array and sort by date
+      const sortedData = Object.values(monthlyData)
+        .sort((a, b) => a.fullDate - b.fullDate)
+        .map(item => ({
+          month: item.month,
+          users: item.users
+        }));
+
+      setUserGrowthData(sortedData);
+
+    } catch (error) {
+      console.error('Error fetching user growth data:', error);
+      setUserGrowthData([]);
+    }
+  };
+
+  // Fetch counts from Supabase
+  const fetchCounts = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch users count (from auth.users)
+      const { count: usersCount, error: usersError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch events count
+      const { count: eventsCount, error: eventsError } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch places count
+      const { count: placesCount, error: placesError } = await supabase
+        .from('places')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch restaurants count
+      const { count: restaurantsCount, error: restaurantsError } = await supabase
+        .from('restaurants')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch native products count
+      const { count: productsCount, error: productsError } = await supabase
+        .from('native_products')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch reviews count
+      const { count: reviewsCount, error: reviewsError } = await supabase
+        .from('reviews')
+        .select('*', { count: 'exact', head: true });
+
+      // Get overall average rating
+      const overallRating = await getOverallAverageRating();
+
+      // Update stats state
+      setStats({
+        totalUsers: usersCount || 0,
+        totalEvents: eventsCount || 0,
+        totalPlaces: placesCount || 0,
+        totalRestaurants: restaurantsCount || 0,
+        totalProducts: productsCount || 0,
+        totalReviews: reviewsCount || 0
+      });
+
+      // Set average rating
+      setAverageRating(overallRating);
+
+    } catch (error) {
+      console.error('Error fetching counts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch destination data with average ratings calculation from Supabase only
+  const fetchDestinationData = async () => {
+    try {
+      // Fetch all reviews with place information in a single query
+      const { data: reviewsData, error } = await supabase
+        .from('reviews')
+        .select(`
+          rating,
+          place_id,
+          places!inner(p_name)
+        `);
+
+      if (error) {
+        throw error;
+      }
+
+      // If no reviews data, set empty array
+      if (!reviewsData || reviewsData.length === 0) {
+        setDestinationData([]);
+        return;
+      }
+
+      // Calculate average rating for each unique place
+      const placeRatings = {};
+      
+      reviewsData.forEach(review => {
+        const placeId = review.place_id;
+        const placeName = review.places.p_name;
+        const rating = review.rating;
+        
+        if (!placeRatings[placeId]) {
+          placeRatings[placeId] = {
+            name: placeName,
+            totalRating: 0,
+            count: 0
+          };
+        }
+        
+        placeRatings[placeId].totalRating += rating;
+        placeRatings[placeId].count += 1;
+      });
+
+      // Convert to array and calculate average ratings
+      const placesWithRatings = Object.values(placeRatings).map(place => ({
+        name: place.name,
+        averageRating: place.count > 0 ? parseFloat((place.totalRating / place.count).toFixed(1)) : 0,
+        reviewCount: place.count,
+        totalRating: place.totalRating
+      }));
+
+      // Sort by average rating (descending) and get top 5
+      const topPlaces = placesWithRatings
+        .filter(place => place.averageRating > 0)
+        .sort((a, b) => b.averageRating - a.averageRating)
+        .slice(0, 5);
+
+      // Format data for pie chart using only Supabase data
+      const pieChartData = topPlaces.map((place, index) => ({
+        name: place.name,
+        bookings: Math.round((place.averageRating / 5) * 100), // Convert 0-5 rating to percentage
+        averagingRating: place.averageRating,
+        reviewCount: place.reviewCount,
+        color: COLORS[index % COLORS.length],
+        isIndividual: true
+      }));
+
+      setDestinationData(pieChartData);
+
+    } catch (error) {
+      console.error('Error fetching destination data:', error);
+      // Only set empty array on error - no fallback data
+      setDestinationData([]);
+    }
+  };
+
+  // Set up real-time subscriptions
+  const setupRealtimeSubscriptions = () => {
+    // Subscribe to profiles changes
+    const profilesSubscription = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          fetchCounts();
+          fetchUserGrowthData();
+          fetchRecentActivities();
+          if (payload.eventType === 'INSERT') {
+            // Show popup for new user
+            const newUser = payload.new;
+            alert(`New user "${newUser.username}" has registered!`);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to events changes
+    const eventsSubscription = supabase
+      .channel('events-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events'
+        },
+        (payload) => {
+          fetchCounts();
+          fetchRecentActivities();
+          if (payload.eventType === 'INSERT') {
+            // Show popup for new event
+            const newEvent = payload.new;
+            alert(`New event "${newEvent.event_name}" has been added!`);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to places changes
+    const placesSubscription = supabase
+      .channel('places-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'places'
+        },
+        (payload) => {
+          fetchCounts();
+          fetchDestinationData();
+          fetchRecentActivities();
+          if (payload.eventType === 'INSERT') {
+            // Show popup for new place
+            const newPlace = payload.new;
+            alert(`New destination "${newPlace.p_name}" has been published!`);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to restaurants changes
+    const restaurantsSubscription = supabase
+      .channel('restaurants-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'restaurants'
+        },
+        () => {
+          fetchCounts();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to native_products changes
+    const productsSubscription = supabase
+      .channel('native_products-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'native_products'
+        },
+        (payload) => {
+          fetchCounts();
+          fetchRecentActivities();
+          if (payload.eventType === 'INSERT') {
+            // Show popup for new product
+            const newProduct = payload.new;
+            alert(`New native product "${newProduct.product_name}" has been added!`);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to reviews changes
+    const reviewsSubscription = supabase
+      .channel('reviews-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reviews'
+        },
+        (payload) => {
+          fetchCounts();
+          fetchDestinationData();
+          fetchRecentActivities();
+          if (payload.eventType === 'INSERT') {
+            // Show popup for new review
+            const newReview = payload.new;
+            alert(`New ${newReview.rating}-star review has been received!`);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to reports changes
+    const reportsSubscription = supabase
+      .channel('reports-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reports'
+        },
+        (payload) => {
+          fetchRecentActivities();
+          if (payload.eventType === 'INSERT') {
+            // Show popup for new report
+            const newReport = payload.new;
+            // Fetch user details for the report
+            supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', newReport.user_id)
+              .single()
+              .then(({ data: userData }) => {
+                const username = userData?.username || 'Unknown User';
+                alert(`New report received from ${username}: "${newReport.problems}"`);
+              })
+              .catch(() => {
+                alert(`New report received: "${newReport.problems}"`);
+              });
+          }
+        }
+      )
+      .subscribe();
+
+    // Return cleanup function
+    return () => {
+      profilesSubscription.unsubscribe();
+      eventsSubscription.unsubscribe();
+      placesSubscription.unsubscribe();
+      restaurantsSubscription.unsubscribe();
+      productsSubscription.unsubscribe();
+      reviewsSubscription.unsubscribe();
+      reportsSubscription.unsubscribe();
+    };
+  };
+
+  useEffect(() => {
+    fetchCounts();
+    fetchDestinationData();
+    fetchUserGrowthData();
+    fetchRecentActivities();
+    const cleanup = setupRealtimeSubscriptions();
+
+    // Cleanup subscriptions on component unmount
+    return cleanup;
+  }, []);
+
+  // Navigation handlers for icon buttons
+  const navigateToEvents = () => navigate("/dashboard/events");
+  const navigateToUsers = () => navigate("/dashboard/users");
+  const navigateToNativeProducts = () => navigate("/dashboard/native_products");
+  const navigateToPlaces = () => navigate("/dashboard/places");
 
   return (
-    <div className="space-y-8 p-6 bg-linear-to-br from-slate-50 to-blue-50/30 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-4xl font-bold bg-linear-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
-            Dashboard Overview
-          </h1>
-          <p className="text-muted-foreground mt-2 flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Welcome back! Here's your tourism app performance summary
-          </p>
+    <div className="space-y-4 p-0 bg-white min-h-screen">
+      {/* Header with Full Image Preview - Scrollable Container */}
+      <div className="relative overflow-hidden shadow-xl h-100 overflow-y-auto">
+        {/* Background Image Container with larger height */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center min-h-[1500px]"
+          style={{ backgroundImage: `url(${dashboardHeader})` }}
+        >
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30"></div>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-soft border">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium text-green-600">System Active</span>
+        
+        {/* Header Content */}
+        <div className="relative z-10 p-8 min-h-[800px] flex flex-col justify-between">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="text-white">
+              <h1 className="text-6xl font-bold mb-2">
+                Home Page Overview
+              </h1>
+              <p className="text-blue-100 flex items-center gap-2 text-xl">
+                <Clock className="w-5 h-5" />
+                Welcome back! Here's your tourism app performance summary
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Quick Actions Bar */}
-      
 
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Events Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-blue-500 to-blue-600 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Events</CardTitle>
-            <div className="p-2 bg-white/20 rounded-lg">
+            <button 
+              className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors cursor-pointer"
+              onClick={navigateToEvents}
+            >
               <Calendar className="h-4 w-4" />
-            </div>
+            </button>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-2">24</div>
-            <div className="flex items-center text-blue-100 text-sm">
+            <div className="text-3xl font-bold mb-2">
+              {loading ? (
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                stats.totalEvents
+              )}
+            </div>
+            <div className="flex items-center text-green-100 text-sm">
               <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+12% this month</span>
+              <span>Live count of events</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Users Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-purple-500 to-pink-600 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <div className="p-2 bg-white/20 rounded-lg">
+            <CardTitle className="text-xl font-medium">Active Users</CardTitle>
+            <button 
+              className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors cursor-pointer"
+              onClick={navigateToUsers}
+            >
               <Users className="h-4 w-4" />
-            </div>
+            </button>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-2">1,842</div>
-            <div className="flex items-center text-pink-100 text-sm">
+            <div className="text-3xl font-bold mb-2">
+              {loading ? (
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                stats.totalUsers
+              )}
+            </div>
+            <div className="flex items-center text-pink-100 text-lg">
               <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+8% from last week</span>
+              <span>Live count of active users</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Products Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-green-500 to-emerald-600 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Native Products</CardTitle>
-            <div className="p-2 bg-white/20 rounded-lg">
+            <CardTitle className="text-xl font-medium">Native Products</CardTitle>
+            <button 
+              className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors cursor-pointer"
+              onClick={navigateToNativeProducts}
+            >
               <ShoppingCart className="h-4 w-4" />
-            </div>
+            </button>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-2">156</div>
-            <div className="flex items-center text-emerald-100 text-sm">
+            <div className="text-3xl font-bold mb-2">
+              {loading ? (
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                stats.totalProducts
+              )}
+            </div>
+            <div className="flex items-center text-emerald-100 text-lg">
               <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+5 new this week</span>
+              <span>Live count of native products</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Destinations Card */}
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-linear-to-br from-orange-500 to-red-500 text-white">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Destinations</CardTitle>
-            <div className="p-2 bg-white/20 rounded-lg">
+            <CardTitle className="text-xl font-medium">Destinations</CardTitle>
+            <button 
+              className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors cursor-pointer"
+              onClick={navigateToPlaces}
+            >
               <MapPin className="h-4 w-4" />
-            </div>
+            </button>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-2">42</div>
-            <div className="flex items-center text-orange-100 text-sm">
+            <div className="text-3xl font-bold mb-2">
+              {loading ? (
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                stats.totalPlaces
+              )}
+            </div>
+            <div className="flex items-center text-green-100 text-lg">
               <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+3 new locations</span>
+              <span>Live count of destinations</span>
             </div>
           </CardContent>
         </Card>
@@ -154,210 +759,218 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Revenue Chart */}
-        <Card className="xl:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
-              Revenue & Visitors Analytics
+        {/* User Count Growth Chart */}
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Users className="h-5 w-5 text-black-600" />
+              User Growth
             </CardTitle>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
-                Monthly
-              </button>
-              <button className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-full font-medium">
-                Quarterly
-              </button>
-            </div>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: 'none', 
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#3B82F6"
-                  fill="url(#revenueGradient)"
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="visitors"
-                  stroke="#10B981"
-                  strokeWidth={2}
-                  dot={{ fill: '#10B981' }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {userGrowthData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart
+                    data={userGrowthData}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 14 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis tick={{ fontSize: 14 }} />
+                    <Tooltip 
+                      formatter={(value) => [`${value} users`, 'Total Users']}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="users" 
+                      stroke="#10B981" 
+                      fill="#10B981" 
+                      fillOpacity={0.3}
+                      strokeWidth={2}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+                <div className="mt-4 text-center text-lg text-gray-600">
+                  <TrendingUp className="h-4 w-4 inline mr-1 text-green-500" />
+                  Total user growth over time
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                <p>No user data available</p>
+                <p className="text-sm">User growth will appear here once users register</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Popular Destinations */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
+            <CardTitle className="flex items-center gap-2 text-xl">
               <PieChartIcon className="h-5 w-5 text-orange-600" />
-              Popular Destinations
+              Top Rated Destinations
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={destinationData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="bookings"
-                >
-                  {destinationData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+            {destinationData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={destinationData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                      dataKey="bookings"
+                    >
+                      {destinationData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value, name, props) => {
+                        if (props.payload.isIndividual) {
+                          return [`${value}%`, 'Rating Score'];
+                        } else {
+                          return [`${value}%`, 'Average Rating Score'];
+                        }
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="space-y-3 mt-4">
+                  {destinationData.map((destination, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: destination.color }}
+                        ></div>
+                        <div>
+                          <span className="text-lg font-medium">{destination.name}</span>
+                          <div className="flex items-center gap-1 text-sm text-gray-500">
+                            <Star className="w-3 h-3 text-yellow-500" />
+                            <span>{destination.averagingRating}</span>
+                            <span>({destination.reviewCount} reviews)</span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold">{destination.bookings}%</span>
+                    </div>
                   ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="space-y-3 mt-4">
-              {destinationData.map((destination, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: destination.color }}
-                    ></div>
-                    <span className="text-sm font-medium">{destination.name}</span>
-                  </div>
-                  <span className="text-sm font-bold">{destination.bookings}%</span>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Goals Progress */}
-        <Card className="lg:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Target className="h-5 w-5 text-purple-600" />
-              Monthly Goals Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <div className="flex justify-between text-sm mb-3">
-                <span className="font-medium">Revenue Target</span>
-                <span className="font-bold text-purple-600">$68K / $100K</span>
+              </>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Star className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                <p>No rating data available</p>
+                <p className="text-lg">Reviews will appear here once added</p>
               </div>
-              <Progress value={68} className="h-3 bg-purple-100" />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-3">
-                <span className="font-medium">User Acquisition</span>
-                <span className="font-bold text-blue-600">1,842 / 2,500</span>
-              </div>
-              <Progress value={74} className="h-3 bg-blue-100" />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-3">
-                <span className="font-medium">Customer Satisfaction</span>
-                <span className="font-bold text-green-600">4.8 / 5.0</span>
-              </div>
-              <Progress value={96} className="h-3 bg-green-100" />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-3">
-                <span className="font-medium">Content Published</span>
-                <span className="font-bold text-orange-600">42 / 50</span>
-              </div>
-              <Progress value={84} className="h-3 bg-orange-100" />
-            </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Recent Activity */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
+            <CardTitle className="flex items-center gap-2 text-xl">
               <Clock className="h-5 w-5 text-gray-600" />
               Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {activityData.map((activity, index) => (
-                <div key={index} className="flex items-start gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <div className={`p-2 rounded-lg ${
-                    activity.type === 'booking' ? 'bg-green-100 text-green-600' :
-                    activity.type === 'review' ? 'bg-blue-100 text-blue-600' :
-                    activity.type === 'event' ? 'bg-purple-100 text-purple-600' :
-                    'bg-orange-100 text-orange-600'
-                  }`}>
-                    {activity.type === 'booking' && <ShoppingCart className="h-4 w-4" />}
-                    {activity.type === 'review' && <MessageCircle className="h-4 w-4" />}
-                    {activity.type === 'event' && <Calendar className="h-4 w-4" />}
-                    {activity.type === 'destination' && <MapPin className="h-4 w-4" />}
+              {recentActivities.length > 0 ? (
+                recentActivities.map((activity, index) => (
+                  <div key={index} className="flex items-start gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div className={`p-2 rounded-lg ${
+                      activity.type === 'review' ? 'bg-blue-100 text-blue-600' :
+                      activity.type === 'event' ? 'bg-purple-100 text-purple-600' :
+                      activity.type === 'destination' ? 'bg-orange-100 text-orange-600' :
+                      activity.type === 'product' ? 'bg-green-100 text-green-600' :
+                      activity.type === 'user' ? 'bg-pink-100 text-pink-600' :
+                      'bg-red-100 text-red-600'
+                    }`}>
+                      {activity.type === 'review' && <MessageCircle className="h-6 w-6" />}
+                      {activity.type === 'event' && <Calendar className="h-6 w-6" />}
+                      {activity.type === 'destination' && <MapPin className="h-6 w-6" />}
+                      {activity.type === 'product' && <Package className="h-6 w-6" />}
+                      {activity.type === 'user' && <Users className="h-6 w-6" />}
+                      {activity.type === 'report' && <AlertTriangle className="h-6 w-6" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-lg font-medium text-gray-900 truncate">
+                        {activity.event}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">{activity.time}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {activity.event}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Clock className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>No recent activity</p>
+                  <p className="text-sm">Activities will appear here once users interact with the system</p>
                 </div>
-              ))}
+              )}
             </div>
-            <button className="w-full mt-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-              View All Activities
-            </button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Stats Footer */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-soft border text-center">
-          <Eye className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-gray-900">12.4K</div>
-          <div className="text-sm text-gray-600">Page Views</div>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+        <div className="bg-emerald-500 backdrop-blur-sm rounded-lg p-4 shadow-xl text-center">
+          <MessageCircle className="h-6 w-6 text-white mx-auto mb-2" />
+          <div className="text-2xl font-bold text-white">{stats.totalReviews}</div>
+          <div className="text-lg text-gray-900">Reviews</div>
         </div>
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-soft border text-center">
-          <MessageCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-gray-900">324</div>
-          <div className="text-sm text-gray-600">Reviews</div>
+        <div className="bg-emerald-500 backdrop-blur-sm rounded-lg p-4 shadow-xl text-center">
+          <Award className="h-6 w-6 text-white mx-auto mb-2" />
+          <div className="text-2xl font-bold text-white">
+            {loading ? (
+              <div className="w-6 h-6 border-2 border-black-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            ) : (
+              averageRating || 0
+            )}
+          </div>
+          <div className="text-lg text-gray-900">Avg Rating</div>
         </div>
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-soft border text-center">
-          <Award className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-gray-900">4.8</div>
-          <div className="text-sm text-gray-600">Avg Rating</div>
-        </div>
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-soft border text-center">
-          {/*<Plane className="h-6 w-6 text-orange-600 mx-auto mb-2" />*/}
-          <div className="text-2xl font-bold text-gray-900">156</div>
-          <div className="text-sm text-gray-600">Bookings</div>
+        <div className="bg-emerald-500 backdrop-blur-sm rounded-lg p-4 shadow-xl text-center">
+          <Navigation className="h-6 w-6 text-white mx-auto mb-2" />
+          <div className="text-2xl font-bold text-white">{stats.totalRestaurants}</div>
+          <div className="text-lg text-gray-900">Restaurants</div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-white backdrop-blur-none p-0 shadow-soft">
+        <div className="text-center">
+          <p className="text-gray-900 text-lg">
+            © 2025 Copyright: <span className="font-semibold text-emelard-600">Syntex Pillers</span>
+          </p>
+          <p className="text-gray-700 text-sm mt-2">
+            Explore Jaffna Tourism Admin Dashboard | All rights reserved
+          </p>
+          <div className="flex justify-center space-x-4 mt-3">
+            <span className="text-gray-600 text-sm">Version 1.0.0</span>
+            <span className="text-gray-600 text-sm">•</span>
+            <span className="text-gray-600 text-sm">Powered by Supabase & React</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
