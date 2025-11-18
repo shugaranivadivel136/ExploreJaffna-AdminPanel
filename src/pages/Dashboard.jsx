@@ -608,7 +608,7 @@ const Dashboard = () => {
     <div className="space-y-4 p-0 bg-white min-h-screen">
       {/* Header with Full Image Preview - Scrollable Container */}
       <div className="relative overflow-hidden shadow-xl h-100 overflow-y-auto">
-        {/* Background Image Container with larger height */}
+
         <div 
           className="absolute inset-0 bg-cover bg-center min-h-[1500px]"
           style={{ backgroundImage: `url(${dashboardHeader})` }}
