@@ -41,7 +41,7 @@ import { supabase } from "../supabaseClient";
 import { useState, useEffect } from "react";
 
 // Import your image from the assets folder
-import dashboardHeader from "../assets/logos.png";
+import dashboardHeader from "../assets/jaffna tourism.jpg";
 
 // Colors for the pie chart
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
