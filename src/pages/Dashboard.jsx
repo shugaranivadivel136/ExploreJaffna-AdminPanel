@@ -62,6 +62,77 @@ const Dashboard = () => {
   const [userGrowthData, setUserGrowthData] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
 
+  // Check authentication on component mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const isAdminLoggedIn = localStorage.getItem("isAdminLoggedIn");
+      if (!isAdminLoggedIn || isAdminLoggedIn !== "true") {
+        navigate("/");
+        return;
+      }
+    };
+
+    checkAuth();
+
+    // Add beforeunload event to clear storage if needed
+    const handleBeforeUnload = () => {
+      // Optional: Clear auth data when page is being unloaded
+      // localStorage.removeItem("isAdminLoggedIn");
+      // localStorage.removeItem("adminEmail");
+      // localStorage.removeItem("userId");
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [navigate]);
+
+  // Function to handle logout
+  const handleLogout = async () => {
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      // Clear local storage
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      localStorage.removeItem("userId");
+      
+      // Navigate to login page
+      navigate("/");
+      
+      // Prevent back button after logout
+      window.history.pushState(null, "", window.location.href);
+      window.onpopstate = function() {
+        window.history.go(1);
+      };
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // Prevent back navigation after logout
+  useEffect(() => {
+    // Push current state to history
+    window.history.pushState(null, "", window.location.href);
+    
+    const handleBackButton = (event) => {
+      const isAdminLoggedIn = localStorage.getItem("isAdminLoggedIn");
+      if (!isAdminLoggedIn || isAdminLoggedIn !== "true") {
+        window.history.pushState(null, "", window.location.href);
+        navigate("/");
+      }
+    };
+
+    window.addEventListener('popstate', handleBackButton);
+
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [navigate]);
+
   // Function to format time ago
   const getTimeAgo = (timestamp) => {
     const now = new Date();
@@ -593,14 +664,19 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchCounts();
-    fetchDestinationData();
-    fetchUserGrowthData();
-    fetchRecentActivities();
-    const cleanup = setupRealtimeSubscriptions();
-
-    return cleanup;
-  }, []);
+    // Check authentication before setting up subscriptions
+    const isAdminLoggedIn = localStorage.getItem("isAdminLoggedIn");
+    if (isAdminLoggedIn && isAdminLoggedIn === "true") {
+      fetchCounts();
+      fetchDestinationData();
+      fetchUserGrowthData();
+      fetchRecentActivities();
+      const cleanup = setupRealtimeSubscriptions();
+      return cleanup;
+    } else {
+      navigate("/");
+    }
+  }, [navigate]);
 
   // icon buttons
   const navigateToEvents = () => navigate("/dashboard/events");
@@ -632,6 +708,13 @@ const Dashboard = () => {
                 Welcome back! Here's your tourism app performance summary
               </p>
             </div>
+            {/* Logout Button */}
+            <Button
+              onClick={handleLogout}
+              className="bg-emerald-800 hover:bg-emerald-1000 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-lg"
+            >
+              Logout
+            </Button>
           </div>
         </div>
       </div>

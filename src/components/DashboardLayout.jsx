@@ -12,13 +12,29 @@ export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Remove authentication token or flag
-    localStorage.removeItem("authToken");
-    // Navigate to login page
-    navigate("/login");
-  };
-
+   const handleLogout = async () => {
+      try {
+        // Sign out from Supabase
+        await supabase.auth.signOut();
+        
+        // Clear local storage
+        localStorage.removeItem("isAdminLoggedIn");
+        localStorage.removeItem("adminEmail");
+        localStorage.removeItem("userId");
+        
+        // Navigate to login page
+        navigate("/");
+        
+        // Prevent back button after logout
+        window.history.pushState(null, "", window.location.href);
+        window.onpopstate = function() {
+          window.history.go(1);
+        };
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    };
+  
   return (
     <div className="flex min-h-screen bg-white">
       {/* Hamburger Menu Button */}
@@ -110,14 +126,6 @@ export default function DashboardLayout() {
         <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow-sm">
           <h2 className="text-2xl font-bold ml-12">Yarl Wander Nest</h2>
           <div className="flex items-center gap-4">
-            {/* Logout Button */}
-            <button
-              className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-emerald-800 rounded hover:bg-emerald-1000 transition-colors"
-              onClick={handleLogout}
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
           </div>
         </header>
 

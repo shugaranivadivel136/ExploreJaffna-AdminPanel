@@ -55,31 +55,39 @@ const Native_Products = () => {
   }, [filters, native_products]);
 
   //Handle form input changes
-  const handleChange = (product) => {
-    const { pro_name, value } = product.target;
-    setFormData({ ...formData, [pro_name]: value });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   // Handle image upload directly to Supabase Storage
-  const handleImageUpload = async (product) => {
-    const file = product.target.files[0];
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
     if (!file) return;
 
     setUploading(true);
 
     try {
-      // create unique file name
-      const fileName = `${Date.now()}_${file.pro_name}`;
+      // Create unique file name
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
+      const filePath = `native-products/${fileName}`;
 
-      const { data: publicData, error: urlError } = supabase.storage
+      // Upload file to Supabase Storage
+      const { error: uploadError } = await supabase.storage
         .from('jaffnaexplore')
-        .getPublicUrl(fileName);
+        .upload(filePath, file);
 
-      if (urlError) throw urlError;
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: publicData } = supabase.storage
+        .from('jaffnaexplore')
+        .getPublicUrl(filePath);
 
       const publicUrl = publicData.publicUrl;
 
-      //save the public URL in form data
+      // Save the public URL in form data
       setFormData((prev) => ({ ...prev, pro_image_url: publicUrl }));
       toast.success("Image uploaded successfully!");
     } catch (error) {
@@ -90,9 +98,9 @@ const Native_Products = () => {
     }
   };
 
-  const handleFilterChange = (product) => {
-    const { pro_name, value } = product.target;
-    setFilters({ ...filters, [pro_name]: value });
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilters({ ...filters, [name]: value });
   };
 
   const clearFilters = () => {
@@ -157,8 +165,8 @@ const Native_Products = () => {
   const toggleTableVisibility = () => 
     setIsTableVisible(!isTableVisible);
 
-  const handleSubmit = async (product) => {
-    product.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     if (!formData.pro_name || !formData.pro_image_url || !formData.pro_craft_tec) {
       toast.error("Please fill in all required fields and upload an image.");
@@ -332,8 +340,8 @@ const Native_Products = () => {
                       src={formData.pro_image_url}
                       alt="Preview"
                       className="h-full w-full object-cover"
-                      onError={(product) =>
-                        (product.target.src =
+                      onError={(event) =>
+                        (event.target.src =
                           "https://via.placeholder.com/300x150?text=Invalid+Image+URL")
                       }
                     />
@@ -509,6 +517,9 @@ const Native_Products = () => {
                           <th className="p-4 text-left text-sm font-semibold text-gray-700 hidden md:table-cell">
                             Craft Technology
                           </th>
+                          <th className="p-4 text-left text-sm font-semibold text-gray-700">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
@@ -524,8 +535,8 @@ const Native_Products = () => {
                                     src={product.pro_image_url}
                                     alt={product.pro_name}
                                     className="h-full w-full object-cover"
-                                    onError={(product) =>
-                                      (product.target.src =
+                                    onError={(event) =>
+                                      (event.target.src =
                                         "https://via.placeholder.com/64x48?text=Image+Error")
                                     }
                                   />
@@ -538,6 +549,11 @@ const Native_Products = () => {
                                     {product.pro_craft_tec}
                                   </div>
                                 </div>
+                              </div>
+                            </td>
+                            <td className="p-4 hidden md:table-cell">
+                              <div className="text-sm text-gray-600">
+                                {product.pro_craft_tec}
                               </div>
                             </td>
                             <td className="p-4">
@@ -559,7 +575,7 @@ const Native_Products = () => {
                                       strokeLinecap="round"
                                       strokeLinejoin="round"
                                       strokeWidth={2}
-                                      d="M11 5H6a2 极速2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                     />
                                   </svg>
                                 </button>
@@ -573,14 +589,14 @@ const Native_Products = () => {
                                     xmlns="http://www.w3.org/2000/svg"
                                     className="h-5 w-5"
                                     fill="none"
-                                    viewBox="极速0 0 24 24"
+                                    viewBox="0 0 24 24"
                                     stroke="currentColor"
                                   >
                                     <path
                                       strokeLinecap="round"
                                       strokeLinejoin="round"
                                       strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7极速h16"
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                     />
                                   </svg>
                                 </button>
@@ -594,9 +610,9 @@ const Native_Products = () => {
                 )}
               </div>
             ))}
-          </div>
         </div>
       </div>
+    </div>
   );
 };
 

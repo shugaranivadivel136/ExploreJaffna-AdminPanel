@@ -528,7 +528,7 @@ const Places = () => {
                   <tbody className="divide-y divide-gray-200">
                     {filteredPlaces.map((place) => (
                       <tr key={place.place_id} className="hover:bg-gray-50">
-                        <td className="p-4 flex items-center gap-3">
+                        <td className="p-4 items-center gap-3">
                           <img
                             src={place.image_url}
                             alt={place.p_name}

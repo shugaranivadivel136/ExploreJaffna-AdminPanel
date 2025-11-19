@@ -10,9 +10,7 @@ import {
   Mail, 
   Shield, 
   MapPin, 
-  Plane, 
-  ArrowLeft,
-  CheckCircle2
+  Plane 
 } from "lucide-react";
 import { supabase } from "../supabaseClient";
 
@@ -21,9 +19,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [forgotPassword, setForgotPassword] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -88,37 +83,6 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleForgotPassword = async (e) => {
-    e.preventDefault();
-    setResetLoading(true);
-    setError("");
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-
-      if (error) {
-        setError("Failed to send reset email: " + error.message);
-        console.error(error);
-      } else {
-        setResetSent(true);
-      }
-    } catch (error) {
-      console.error("Password reset error:", error);
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
-  const handleBackToLogin = () => {
-    setForgotPassword(false);
-    setResetSent(false);
-    setEmail("");
-    setError("");
   };
 
   return (
@@ -194,13 +158,10 @@ const Login = () => {
                 </div>
               </div>
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                {forgotPassword ? "Reset Password" : "Admin Portal"}
+                Admin Portal
               </CardTitle>
               <p className="text-gray-500 text-sm mt-2">
-                {forgotPassword 
-                  ? "Enter your email to reset your password" 
-                  : "Sign in with admin credentials to access dashboard"
-                }
+                Sign in with admin credentials to access dashboard
               </p>
             </CardHeader>
             
@@ -215,163 +176,88 @@ const Login = () => {
                 </div>
               )}
 
-              {/* Reset Success Message */}
-              {resetSent && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                    <p className="text-sm font-medium text-green-800">
-                      Password reset link sent! Check your email.
+              {/* Login Form */}
+              <form onSubmit={handleLogin} className="space-y-5">
+                {/* Email Field */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-sm font-medium text-gray-700">
+                    <Mail className="w-4 h-4 mr-2 text-emerald-600" />
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="admin@yarlwandernest.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 transition-all duration-200"
+                    />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-sm font-medium text-gray-700">
+                    <Lock className="w-4 h-4 mr-2 text-emerald-600" />
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="pl-10 pr-10 h-12 bg-white/50 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 transition-all duration-200"
+                    />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Login Button */}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-emerald-700 hover:to-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-200 transform hover:-translate-y-0.5"
+                >
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Verifying Access...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Shield className="w-4 h-4" />
+                      <span>Access Dashboard</span>
+                    </div>
+                  )}
+                </Button>
+              </form>
+
+              {/* Security Notice */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <Shield className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-emerald-800">Admin Access Only</p>
+                    <p className="text-xs text-emerald-600 mt-1">
+                      This portal is restricted to users with admin privileges. 
+                      Regular users will not be granted access.
                     </p>
                   </div>
                 </div>
-              )}
-
-              {forgotPassword ? (
-                // Password Reset Form
-                <form onSubmit={handleForgotPassword} className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="flex items-center text-sm font-medium text-gray-700">
-                      <Mail className="w-4 h-4 mr-2 text-emerald-600" />
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="reset-email"
-                        type="email"
-                        placeholder="admin@yarlwandernest.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 transition-all duration-200"
-                      />
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={resetLoading}
-                    className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-emerald-700 hover:to-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-200"
-                  >
-                    {resetLoading ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Sending Reset Link...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <Mail className="w-4 h-4" />
-                        <span>Send Reset Link</span>
-                      </div>
-                    )}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBackToLogin}
-                    className="w-full h-12 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Login
-                  </Button>
-                </form>
-              ) : (
-                // Login Form
-                <form onSubmit={handleLogin} className="space-y-5">
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <label className="flex items-center text-sm font-medium text-gray-700">
-                      <Mail className="w-4 h-4 mr-2 text-emerald-600" />
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="admin@yarlwandernest.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 transition-all duration-200"
-                      />
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    </div>
-                  </div>
-
-                  {/* Password Field */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center text-sm font-medium text-gray-700">
-                        <Lock className="w-4 h-4 mr-2 text-emerald-600" />
-                        Password
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setForgotPassword(true)}
-                        className="text-xs text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
-                      >
-                        Forgot Password?
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="pl-10 pr-10 h-12 bg-white/50 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 transition-all duration-200"
-                      />
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Login Button */}
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-emerald-700 hover:to-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-200 transform hover:-translate-y-0.5"
-                  >
-                    {loading ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Verifying Access...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <Shield className="w-4 h-4" />
-                        <span>Access Dashboard</span>
-                      </div>
-                    )}
-                  </Button>
-                </form>
-              )}
-
-              {/* Security Notice */}
-              {!forgotPassword && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                  <div className="flex items-start space-x-3">
-                    <Shield className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-emerald-800">Admin Access Only</p>
-                      <p className="text-xs text-emerald-600 mt-1">
-                        This portal is restricted to users with admin privileges. 
-                        Regular users will not be granted access.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              </div>
 
               {/* Support Info */}
               <div className="text-center">
@@ -399,5 +285,5 @@ const Login = () => {
     </div>
   );
 };
-
+ 
 export default Login;
