@@ -140,12 +140,10 @@ const Dashboard = () => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Fetch recent reports count
-      const { data: recentReports, error: reportsError } = await supabase
+      // Fetch TOTAL count of reports from reports table
+      const { count: totalReportsCount, error: reportsError } = await supabase
         .from('reports')
-        .select('created_at')
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .select('*', { count: 'exact', head: true });
 
       if (reviewsError || placesError || eventsError || productsError || usersError || reportsError) {
         throw new Error('Error fetching recent activities');
@@ -166,13 +164,20 @@ const Dashboard = () => {
         });
       }
 
-      // Add report activities - show count of recent reports
-      if (recentReports && recentReports.length > 0) {
-        const reportCount = recentReports.length;
-        const latestReportTime = recentReports[0].created_at;
+      // Add report activities - show TOTAL count of reports
+      if (totalReportsCount && totalReportsCount > 0) {
+        // Get the latest report timestamp for time display
+        const { data: latestReport, error: latestReportError } = await supabase
+          .from('reports')
+          .select('created_at')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        const latestReportTime = latestReport && latestReport.length > 0 ? latestReport[0].created_at : new Date();
+        
         activities.push({
           type: 'report',
-          event: `We have got ${reportCount} reports from users`,
+          event: `We have got ${totalReportsCount} total reports from users`,
           time: getTimeAgo(latestReportTime),
           created_at: latestReportTime
         });
@@ -349,10 +354,10 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch destination data with average ratings calculation from Supabase only
+  // Fetch destination data with average ratings
   const fetchDestinationData = async () => {
     try {
-      // Fetch all reviews with place information in a single query
+      // Fetch all reviews with place information
       const { data: reviewsData, error } = await supabase
         .from('reviews')
         .select(`
@@ -594,11 +599,10 @@ const Dashboard = () => {
     fetchRecentActivities();
     const cleanup = setupRealtimeSubscriptions();
 
-    // Cleanup subscriptions on component unmount
     return cleanup;
   }, []);
 
-  // Navigation handlers for icon buttons
+  // icon buttons
   const navigateToEvents = () => navigate("/dashboard/events");
   const navigateToUsers = () => navigate("/dashboard/users");
   const navigateToNativeProducts = () => navigate("/dashboard/native_products");
@@ -606,14 +610,13 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-4 p-0 bg-white min-h-screen">
-      {/* Header with Full Image Preview - Scrollable Container */}
+      {/* Header with Full Image- Scrollable Container */}
       <div className="relative overflow-hidden shadow-xl h-100 overflow-y-auto">
 
         <div 
           className="absolute inset-0 bg-cover bg-center min-h-[800px]"
           style={{ backgroundImage: `url(${dashboardHeader})` }}
         >
-          {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30"></div>
         </div>
         
@@ -633,7 +636,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Events Card */}
         <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
@@ -744,7 +746,6 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* User Count Growth Chart */}
         <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
