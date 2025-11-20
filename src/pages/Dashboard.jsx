@@ -952,53 +952,6 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Recent Activity */}
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Clock className="h-5 w-5 text-gray-600" />
-              Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.length > 0 ? (
-                recentActivities.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div className={`p-2 rounded-lg ${
-                      activity.type === 'review' ? 'bg-blue-100 text-blue-600' :
-                      activity.type === 'event' ? 'bg-purple-100 text-purple-600' :
-                      activity.type === 'destination' ? 'bg-orange-100 text-orange-600' :
-                      activity.type === 'product' ? 'bg-green-100 text-green-600' :
-                      activity.type === 'user' ? 'bg-pink-100 text-pink-600' :
-                      'bg-red-100 text-red-600'
-                    }`}>
-                      {activity.type === 'review' && <MessageCircle className="h-6 w-6" />}
-                      {activity.type === 'event' && <Calendar className="h-6 w-6" />}
-                      {activity.type === 'destination' && <MapPin className="h-6 w-6" />}
-                      {activity.type === 'product' && <Package className="h-6 w-6" />}
-                      {activity.type === 'user' && <Users className="h-6 w-6" />}
-                      {activity.type === 'report' && <AlertTriangle className="h-6 w-6" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-lg font-medium text-gray-900 truncate">
-                        {activity.event}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Clock className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                  <p>No recent activity</p>
-                  <p className="text-sm">Activities will appear here once users interact with the system</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Quick Stats */}
